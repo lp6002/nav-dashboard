@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视频</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+body{display:flex;min-height:100vh;background:#f5f0f5;}
+.sidebar{width:220px;background:#fff;border-right:1px solid #eee;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-logo{padding:18px 16px;font-size:18px;font-weight:800;color:#6a5acd;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;}
+.sidebar-logo .icon{width:28px;height:28px;background:linear-gradient(135deg,#6a5acd,#9b59b6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-item{display:flex;align-items:center;padding:10px 16px;cursor:pointer;color:#444;font-size:13px;transition:all .1s;border-left:3px solid transparent;text-decoration:none;}
+.nav-item:hover{background:#f8f0ff;color:#6a5acd;}
+.nav-item.active{background:#f0e6ff;color:#6a5acd;border-left-color:#6a5acd;font-weight:600;}
+.nav-item .ico{width:20px;text-align:center;margin-right:10px;font-size:15px;}
+.nav-item .arrow{margin-left:auto;font-size:10px;color:#bbb;}
+.nav-divider{height:1px;background:#f0f0f0;margin:6px 16px;}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.top-header{display:flex;align-items:center;padding:12px 24px;background:#1a1a2e;gap:20px;}
+.top-header a{color:rgba(255,255,255,0.75);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.top-header a:hover{color:#fff;}
+.top-header .brand{font-weight:700;color:#fff;}
+.top-header .brand .tag{font-size:10px;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:999px;color:rgba(255,255,255,0.6);margin-left:4px;}
+.top-header .right{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);}
+
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.tab-bar{display:flex;gap:2px;padding:16px 24px 0;overflow-x:auto;flex-shrink:0;}
+.tab{
+  padding:10px 20px;border-radius:12px 12px 0 0;font-size:13px;font-weight:600;cursor:pointer;
+  color:#888;background:transparent;transition:all .15s;white-space:nowrap;border:none;
+}
+.tab:hover{color:#6a5acd;background:rgba(106,90,205,0.06);}
+.tab.active{color:#6a5acd;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.04);position:relative;}
+.tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#6a5acd;}
+
+.chat-wrap{flex:1;background:#fff;margin:0 24px 24px;border-radius:0 0 16px 16px;box-shadow:0 2px 12px rgba(0,0,0,0.04);overflow:hidden;display:flex;flex-direction:column;}
+.chat-header{padding:14px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.chat-header .cicon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;}
+.chat-header .cname{font-weight:700;font-size:15px;color:#333;}
+.chat-header .cdesc{font-size:12px;color:#999;}
+.chat-body{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#fafafa;}
+.chat-body iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.launch-card{display:flex;flex-direction:column;align-items:center;gap:16px;padding:30px;text-align:center;max-width:400px;}
+.launch-card .licon{width:80px;height:80px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+.launch-card .ltitle{font-size:20px;font-weight:700;color:#333;}
+.launch-card .ldesc{font-size:13px;color:#999;line-height:1.6;}
+.launch-card .lbtn{padding:14px 36px;border:none;border-radius:999px;font-size:16px;font-weight:700;cursor:pointer;color:#fff;transition:all .15s;box-shadow:0 4px 14px rgba(0,0,0,0.1);}
+.launch-card .lbtn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.15);}
+.launch-card .ltip{font-size:12px;color:#ccc;margin-top:-8px;}
+.chat-footer{text-align:center;font-size:11px;color:#ccc;padding:6px;border-top:1px solid #f5f5f5;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="icon">W</div><span>我的工作台</span></div>
+  <div class="sidebar-nav">
+    <a class="nav-item" href="index.html"><span class="ico">🏠</span><span>主页</span></a>
+    <a class="nav-item" href="#"><span class="ico">📊</span><span>广告投放</span><span class="arrow">›</span></a>
+    <a class="nav-item" href="games.html"><span class="ico">🎯</span><span>游戏投放管理</span></a>
+    <a class="nav-item" href="#"><span class="ico">📋</span><span>日报分析</span></a>
+    <a class="nav-item" href="#"><span class="ico">🎮</span><span>游戏管理</span><span class="arrow">›</span></a>
+    <div class="nav-divider"></div>
+    <a class="nav-item active" href="video.html"><span class="ico">🎬</span><span>视频</span></a>
+    <a class="nav-item" href="#"><span class="ico">💰</span><span>收益统计</span></a>
+    <a class="nav-item" href="#"><span class="ico">🔧</span><span>常用工具</span><span class="arrow">›</span></a>
+    <a class="nav-item" href="ai.html"><span class="ico">🤖</span><span>AI助手</span></a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#"><span class="ico">⚙️</span><span>配置</span></a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="top-header">
+    <a href="index.html" class="brand">🎯 工作台<span class="tag">Beta</span></a>
+    <a href="games.html">🎮 游戏投放</a>
+    <a href="video.html">🎬 视频</a>
+    <a href="ai.html">🤖 AI助手</a>
+    <span class="right">视频平台快捷入口</span>
+  </div>
+
+  <div class="content">
+    <div class="tab-bar" id="tabBar"></div>
+    <div class="chat-wrap">
+      <div class="chat-header" id="chatHeader"></div>
+      <div class="chat-body" id="chatBody"></div>
+      <div class="chat-footer">点击标签切换 · 部分平台需登录账号</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SITES = [
+  {id:'bilibili', name:'哔哩哔哩', icon:'B', color:'#fb7299',
+   url:'https://www.bilibili.com/',
+   desc:'Bilibili · 国内最大弹幕视频网', embed:true,
+   embedUrl:'https://www.bilibili.com/'},
+
+  {id:'youtube', name:'YouTube', icon:'YT', color:'#ff0000',
+   url:'https://www.youtube.com/',
+   desc:'全球最大视频分享平台', embed:false,
+   embedUrl:''},
+
+  {id:'douyin', name:'抖音', icon:'抖', color:'#000000',
+   url:'https://www.douyin.com/',
+   desc:'抖音 · 短视频社交平台', embed:true,
+   embedUrl:'https://www.douyin.com/'},
+
+  {id:'kuaishou', name:'快手', icon:'快', color:'#ff4906',
+   url:'https://www.kuaishou.com/',
+   desc:'快手 · 记录世界记录你', embed:true,
+   embedUrl:'https://www.kuaishou.com/'},
+
+  {id:'twitch', name:'Twitch', icon:'Tw', color:'#9146ff',
+   url:'https://www.twitch.tv/',
+   desc:'Twitch · 游戏直播平台', embed:false,
+   embedUrl:''},
+
+  {id:'tiktok', name:'TikTok', icon:'TT', color:'#fe2c55',
+   url:'https://www.tiktok.com/',
+   desc:'TikTok · 全球短视频平台', embed:false,
+   embedUrl:''},
+
+  {id:'vimeo', name:'Vimeo', icon:'V', color:'#1ab7ea',
+   url:'https://vimeo.com/',
+   desc:'Vimeo · 高质量视频创作者社区', embed:true,
+   embedUrl:'https://vimeo.com/'},
+
+  {id:'nicovideo', name:'Niconico', icon:'N', color:'#2c2c2c',
+   url:'https://www.nicovideo.jp/',
+   desc:'Niconico · 日本弹幕视频网', embed:false,
+   embedUrl:''},
+];
+
+let cur = SITES[0];
+
+function render(){
+  document.getElementById('tabBar').innerHTML = SITES.map(m =>
+    `<button class="tab ${m.id===cur.id?'active':''}" onclick="switchTo('${m.id}')">${m.name}</button>`
+  ).join('');
+  renderBody(cur);
+}
+
+function renderBody(m){
+  let header = document.getElementById('chatHeader');
+  let body = document.getElementById('chatBody');
+
+  if(m.id === 'bilibili'){
+    // 哔哩哔哩推荐内容：热门和分区
+    header.innerHTML = `
+      <div class="cicon" style="background:${m.color};">${m.icon}</div>
+      <div><div class="cname">${m.name}</div><div class="cdesc">${m.desc}</div></div>
+    `;
+    body.innerHTML = `
+      <iframe src="https://www.bilibili.com/" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" style="display:block;"></iframe>
+    `;
+  }
+  else if(m.embed){
+    header.innerHTML = `
+      <div class="cicon" style="background:${m.color};">${m.icon}</div>
+      <div><div class="cname">${m.name}</div><div class="cdesc">${m.desc}</div></div>
+    `;
+    body.innerHTML = `
+      <iframe src="${m.embedUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" style="display:block;"></iframe>
+    `;
+  } else {
+    header.innerHTML = `
+      <div class="cicon" style="background:${m.color};">${m.icon}</div>
+      <div><div class="cname">${m.name}</div><div class="cdesc">${m.desc}</div></div>
+    `;
+    body.innerHTML = `
+      <div class="launch-card">
+        <div class="licon" style="background:${m.color};">${m.icon}</div>
+        <div class="ltitle">${m.name}</div>
+        <div class="ldesc">
+          ${m.name} 不支持在当前页面中直接嵌入<br>
+          点击下方按钮，在新窗口中浏览
+        </div>
+        <button class="lbtn" style="background:${m.color};" onclick="window.open('${m.url}','_blank')">
+          🚀 打开 ${m.name}
+        </button>
+        <div class="ltip">需要登录 ${m.name} 账号</div>
+      </div>
+    `;
+  }
+}
+
+function switchTo(id){
+  cur = SITES.find(m => m.id === id);
+  render();
+}
+
+// 初始化当前为哔哩哔哩
+render();
+</script>
+</body>
+</html>

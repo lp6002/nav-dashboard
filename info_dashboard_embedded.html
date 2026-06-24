@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日资讯看板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+body{display:flex;min-height:100vh;background:#f5f0f5;}
+.sidebar{width:220px;background:#fff;border-right:1px solid #eee;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-logo{padding:18px 16px;font-size:18px;font-weight:800;color:#6a5acd;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;}
+.sidebar-logo .icon{width:28px;height:28px;background:linear-gradient(135deg,#6a5acd,#9b59b6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-item{display:flex;align-items:center;padding:10px 16px;cursor:pointer;color:#444;font-size:13px;transition:all .1s;border-left:3px solid transparent;text-decoration:none;}
+.nav-item:hover{background:#f8f0ff;color:#6a5acd;}
+.nav-item.active{background:#f0e6ff;color:#6a5acd;border-left-color:#6a5acd;font-weight:600;}
+.nav-item .ico{width:20px;text-align:center;margin-right:10px;font-size:15px;}
+.nav-item .arrow{margin-left:auto;font-size:10px;color:#bbb;}
+.nav-divider{height:1px;background:#f0f0f0;margin:6px 16px;}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:linear-gradient(180deg,#fce4ec 0%,#f5f0f5 30%,#f5f0f5 100%);}
+.top-header{display:flex;align-items:center;padding:12px 24px;background:#1a1a2e;gap:20px;}
+.top-header a{color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.top-header a:hover{color:#fff;}
+.top-header .brand{font-weight:700;color:#fff;}
+.top-header .brand .tag{font-size:10px;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:999px;color:rgba(255,255,255,.6);margin-left:4px;}
+.top-header .right{margin-left:auto;font-size:11px;color:rgba(255,255,255,.4);}
+
+.content{padding:20px 24px;flex:1;overflow:auto;}
+.page-title{font-size:20px;font-weight:700;color:#333;margin-bottom:4px;display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.page-sub{font-size:13px;color:#999;margin-bottom:16px;}
+
+/* === 看板内容 === */
+.dash-root{
+  --bg:#0a0e1a; --panel:#121829; --panel2:#1a2238; --border:#243149;
+  --text:#e6ecff; --muted:#7d8bb1;
+  --up:#10d68a; --down:#ff5577; --flat:#ffd166;
+  --gold:#ffd24a; --gold2:#ffae3b; --neon:#00e6ff;
+  --radius:14px;
+}
+.dash-root{
+  background:var(--bg);
+  color:var(--text);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding:14px 18px;background:linear-gradient(135deg,rgba(255,210,74,.08),rgba(0,230,255,.04));border:1px solid var(--border);border-radius:var(--radius);}
+.dash-header h1{font-size:20px;font-weight:700;background:linear-gradient(90deg,var(--gold),var(--neon));-webkit-background-clip:text;background-clip:text;color:transparent;display:flex;align-items:center;gap:8px;}
+.dash-header .meta{font-size:11px;color:var(--muted);text-align:right;}
+.refresh-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a1a;border:none;padding:7px 16px;border-radius:9px;font-weight:600;cursor:pointer;font-size:12px;box-shadow:0 4px 14px rgba(255,174,59,.4);transition:transform .15s;}
+.refresh-btn:hover{transform:translateY(-1px)}
+
+.summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.metric{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.metric .lbl{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.metric .v{font-size:18px;font-weight:700;font-family:"SF Mono",Consolas,monospace;}
+.metric .c{font-size:11px;margin-top:3px;}
+
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s;}
+.card:hover{transform:translateY(-2px);border-color:#3a4d77}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--neon));}
+.card.gold::before{background:linear-gradient(90deg,#ffd24a,#ff7e3b)}
+.card.stock::before{background:linear-gradient(90deg,#00e6ff,#3b82f6)}
+.card.hw::before{background:linear-gradient(90deg,#a855f7,#ec4899)}
+.card.ai::before{background:linear-gradient(90deg,#10d68a,#059669)}
+.card.comfyui::before{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.card-title .icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);font-size:13px;}
+.tag{font-size:9px;padding:2px 7px;border-radius:5px;background:#243149;color:var(--muted)}
+
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;}
+.row:last-child{border-bottom:none}
+.row .name{color:var(--text);font-weight:500}
+.row .val{text-align:right}
+.row .price{font-size:15px;font-weight:700;font-family:"SF Mono",Consolas,monospace}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+
+.summary-text{font-size:12px;line-height:1.65;color:var(--text);max-height:340px;overflow-y:auto;padding-right:4px;}
+.summary-text::-webkit-scrollbar{width:5px}
+.summary-text::-webkit-scrollbar-thumb{background:#3a4d77;border-radius:3px}
+.summary-text h4{font-size:13px;font-weight:700;color:var(--gold);margin:10px 0 4px;display:flex;align-items:center;gap:6px;}
+.summary-text h4:first-child{margin-top:0}
+.summary-text ul{margin:4px 0 4px 18px}
+.summary-text li{margin:3px 0;color:#d4dcf0;font-size:12px;}
+.summary-text li strong{color:var(--neon);font-weight:600}
+.summary-text p{margin:4px 0;color:#bcc8e8;font-size:12px}
+
+.empty{color:var(--muted);font-size:11px;padding:10px;text-align:center}
+.loading{color:var(--neon);font-size:11px;padding:10px;text-align:center}
+
+.footer{text-align:center;margin-top:16px;font-size:10px;color:var(--muted);padding:8px;}
+
+#autoRefreshToast{position:fixed;bottom:20px;right:20px;background:rgba(16,214,138,.15);border:1px solid var(--up);color:var(--up);padding:8px 14px;border-radius:8px;font-size:11px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:1000;}
+#autoRefreshToast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="icon">W</div><span>我的工作台</span></div>
+  <div class="sidebar-nav">
+    <a class="nav-item" href="index.html"><span class="ico">🏠</span><span>主页</span></a>
+    <a class="nav-item" href="#"><span class="ico">📊</span><span>广告投放</span><span class="arrow">›</span></a>
+    <a class="nav-item" href="games.html"><span class="ico">🎯</span><span>游戏投放管理</span></a>
+    <a class="nav-item active" href="info_dashboard.html"><span class="ico">📰</span><span>每日资讯看板</span></a>
+    <a class="nav-item" href="#"><span class="ico">📋</span><span>日报分析</span></a>
+    <a class="nav-item" href="#"><span class="ico">🎮</span><span>游戏管理</span><span class="arrow">›</span></a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="video.html"><span class="ico">🎬</span><span>视频</span></a>
+    <a class="nav-item" href="#"><span class="ico">💰</span><span>收益统计</span></a>
+    <a class="nav-item" href="#"><span class="ico">🔧</span><span>常用工具</span><span class="arrow">›</span></a>
+    <a class="nav-item" href="ai.html"><span class="ico">🤖</span><span>AI助手</span></a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#"><span class="ico">⚙️</span><span>配置</span></a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="top-header">
+    <a href="index.html" class="brand">🎯 工作台<span class="tag">Beta</span></a>
+    <a href="games.html">🎮 游戏投放管理</a>
+    <a href="info_dashboard.html">📰 每日资讯看板</a>
+    <span class="right">每日 10:00 自动推送 · Hermes 整理</span>
+  </div>
+
+  <div class="content">
+    <div class="dash-root">
+
+      <div class="dash-header">
+        <h1><span style="font-size:22px">📊</span>每日资讯看板</h1>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="meta">
+            <div id="updateTime">载入中...</div>
+          </div>
+          <button class="refresh-btn" onclick="loadAll()">🔄 刷新</button>
+        </div>
+      </div>
+
+      <div class="summary-bar">
+        <div class="metric"><div class="lbl">🇺🇸 标普500</div><div class="v" id="m_spx">--</div><div class="c" id="m_spx_c">--</div></div>
+        <div class="metric"><div class="lbl">🇺🇸 纳斯达克</div><div class="v" id="m_ixic">--</div><div class="c" id="m_ixic_c">--</div></div>
+        <div class="metric"><div class="lbl">🇭🇰 恒生指数</div><div class="v" id="m_hsi">--</div><div class="c" id="m_hsi_c">--</div></div>
+        <div class="metric"><div class="lbl">🇨🇳 上证指数</div><div class="v" id="m_sh">--</div><div class="c" id="m_sh_c">--</div></div>
+        <div class="metric"><div class="lbl">🥇 国际金价</div><div class="v" id="m_xau">--</div><div class="c" id="m_xau_c">--</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="card gold">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🥇</span>黄金 & 白银</div>
+            <span class="tag">实时</span>
+          </div>
+          <div id="metals"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card stock">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🇨🇳</span>A 股大盘</div>
+            <span class="tag">新浪财经</span>
+          </div>
+          <div id="aShares"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card stock">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🇭🇰</span>港股指数</div>
+            <span class="tag">新浪财经</span>
+          </div>
+          <div id="hkStocks"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card stock">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🇺🇸</span>美股三大指数</div>
+            <span class="tag">延迟15分</span>
+          </div>
+          <div id="usStocks"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card hw">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">💾</span>固态硬盘 SSD</div>
+            <span class="tag">京东</span>
+          </div>
+          <div id="ssdList"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card hw">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🧠</span>内存条</div>
+            <span class="tag">京东</span>
+          </div>
+          <div id="ramList"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card hw">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🎮</span>英伟达显卡</div>
+            <span class="tag">京东</span>
+          </div>
+          <div id="gpuList"><div class="loading">抓取中...</div></div>
+        </div>
+
+        <div class="card ai">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🤖</span>AI 大模型最新动态</div>
+            <span class="tag">每日总结</span>
+          </div>
+          <div class="summary-text" id="aiSummary"><div class="loading">Hermes 整理中...</div></div>
+        </div>
+
+        <div class="card comfyui">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🎨</span>ComfyUI 模型发布</div>
+            <span class="tag">每日总结</span>
+          </div>
+          <div class="summary-text" id="comfySummary"><div class="loading">Hermes 整理中...</div></div>
+        </div>
+
+        <div class="card ai">
+          <div class="card-head">
+            <div class="card-title"><span class="icon">🦾</span>AI & 机器人产业</div>
+            <span class="tag">每日总结</span>
+          </div>
+          <div class="summary-text" id="robotSummary"><div class="loading">Hermes 整理中...</div></div>
+        </div>
+      </div>
+
+      <div class="footer">数据来源：新浪财经 · 英为财情 · 京东 · GitHub · 公开新闻 · Hermes Agent 自动整理 · 本工具仅供个人参考</div>
+    </div>
+  </div>
+</div>
+
+<div id="autoRefreshToast">✅ 已自动刷新</div>
+
+<script>
+// === 内嵌默认数据（防止 file:// 协议 fetch 失败）===
+const EMBEDDED_DATA = {"meta":{"updated_at":"2026-06-22T13:13:14","finance_updated_at":"2026-06-22T13:09:22.238789+08:00","version":1,"news_updated_at":"2026-06-22T13:13:14"},"stocks_a":[{"name":"上证指数","price":4105.3622,"pct":0.36,"change":14.8809},{"name":"深证成指","price":16108.785,"pct":0.49,"change":78.083},{"name":"创业板指","price":4294.272,"pct":0.98,"change":41.882},{"name":"沪深300","price":4984.659,"pct":0.87,"change":43.06},{"name":"中证 500","price":8715.874,"pct":0.49,"change":42.784}],"stocks_hk":[{"name":"恒生指数","price":23811.76,"pct":-0.978,"change":-233.949},{"name":"恒生中国企业指数","price":7935.55,"pct":-1.039,"change":-82.86},{"name":"恒生科技指数","price":4595.07,"pct":-1.354,"change":-62.35}],"stocks_us":[{"name":"标普500指数","price":7500.5801,"pct":1.08,"change":81.00626508},{"name":"纳斯达克","price":26517.9314,"pct":1.91,"change":506.49248974},{"name":"道琼斯","price":51564.6992,"pct":0.14,"change":72.19057888000002}],"metals":{"gold":{"name":"国际金价 (伦敦金 XAU/USD)","price":4183.59,"pct":0.68,"change":28.15,"unit":"USD/盎司","time":"13:09:00"},"silver":{"name":"国际银价 (纽约白银 SI/USD)","price":66.188,"pct":0,"change":66.188,"unit":"USD/盎司"}},"hardware":{"ssd":[{"name":"三星 990 PRO 2TB","price":1299,"note":"京东参考(zol)","change":null},{"name":"三星 9100 PRO 2TB","price":1499,"note":"京东首发促销","change":null},{"name":"西部数据 SN850X 2TB","price":1129,"note":"京东促销参考(zol)","change":null},{"name":"铠侠 RC20 1TB","price":379,"note":"京东参考","change":null}],"ram":[{"name":"金士顿 Fury DDR5 32G 6000","price":665,"note":"京东活动(zol)","change":null},{"name":"芝奇皇家戟 DDR5 32G 6400","price":1099,"note":"京东参考","change":null},{"name":"金士顿 Fury DDR5 64G 6000","price":1899,"note":"京东自营活动(zol)","change":null},{"name":"英睿达 Pro DDR5 64G 5600","price":1696,"note":"京东参考","change":null}],"gpu":[{"name":"英伟达 RTX 5090 D 32G","price":25999,"note":"京东首发参考(IT之家)","change":null},{"name":"英伟达 RTX 5080 16G","price":9749,"note":"京东促销参考(zol)","change":null},{"name":"英伟达 RTX 4090 D 24G","price":17499,"note":"京东自营秒杀(ITCN)","change":null},{"name":"英伟达 RTX 5070 Ti 16G","price":6964,"note":"京东促销参考(zol)","change":null}]},"news_ai":[{"title":"2026 LLM 变天：这 6 款中国开源模型正全面霸榜","url":"https://www.threads.com/@yololab.life/post/DTmw-TNjnFz","source":"threads.com","date":"06-22"},{"title":"全球AI模型发布时间线(持续更新)","url":"https://zhuanlan.zhihu.com/p/14903006525","source":"zhuanlan.zhihu.com","date":"06-22"},{"title":"DeepSeek V4 发布：2026 年开源大模型以 1/30 成本挑战 GPT-5.5","url":"https://my.oschina.net/u/9753217/blog/19682693","source":"oschina.net","date":"06-22"},{"title":"GLM-5.2 / Kimi K2.6 / Qwen3 / MiniMax 2026 开源编程模型横评","url":"https://www.atlascloud.ai/zh/blog/guides/coding-plan-best-open-source-coding-llm","source":"atlascloud.ai","date":"06-22"},{"title":"国产大模型四强对决：Kimi K2.6 vs GLM-5.1 vs Qwen3.6-Plus","url":"https://deepseek.csdn.net/6a320916662f9a54cb803dfe.html","source":"csdn.net","date":"06-22"}],"news_comfy":[{"title":"ComfyUI Changelog (官方)","url":"https://docs.comfy.org/changelog","source":"docs.comfy.org","date":"06-22"},{"title":"ComfyUI v0.25.0 发布说明 (Reddit)","url":"https://www.reddit.com/r/comfyui/comments/1u879sb/release_v0250_comfyorgcomfyui/","source":"reddit.com","date":"06-22"},{"title":"SCAIL-2 / Bernini-R 模型在 ComfyUI 中的应用","url":"https://github.com/zai-org/SCAIL-2","source":"github.com","date":"06-22"},{"title":"Comfy Desktop 新版本说明 (2026-06-12 更新)","url":"https://note.com/hirorohi03/n/n42c818ff26e1","source":"note.com","date":"06-22"},{"title":"Comfy-Org/ComfyUI 官方 Releases (GitHub)","url":"https://github.com/Comfy-Org/ComfyUI/releases","source":"github.com","date":"06-22"}],"news_robot":[{"title":"工信部、国资委启动2026年度人形机器人与具身智能实景实训专项行动","url":"https://news.qq.com/rain/a/20260609A026VL00","source":"qq.com","date":"06-22"},{"title":"央视报道：2026年度人形机器人与具身智能实景实训专项行动启动","url":"https://tv.cctv.com/2026/06/10/VIDEJQM7vLqXUbLbEvrzBtLV260610.shtml","source":"cctv.com","date":"06-22"},{"title":"宇树、智元竞逐出货量第一：2026 人形机器人规模化应用大考","url":"https://www.cls.cn/detail/2268349","source":"cls.cn","date":"06-22"},{"title":"TrendForce：宇树、智元合计将占 2026 中国人形机器人八成出货","url":"https://makerpro.cc/2026/04/estimation-of-china-humanoid-robot-production-in-2026/","source":"makerpro.cc","date":"06-22"},{"title":"CES 2026：智元、星动纪元、宇树、云深处、傅利叶 GR-3","url":"https://zhuanlan.zhihu.com/p/1993814792125835125","source":"zhuanlan.zhihu.com","date":"06-22"}],"summary_ai":"<h4>🤖 闭源旗舰<\/h4>\n<ul>\n  <li><strong>GPT-5.5 / GPT-5.5 Pro<\/strong>：OpenAI 已于 4 月 24 日正式发布并全面开放，主打 agentic 能力跃升，与 Claude Opus 4.7、Gemini 3.1 Pro 形成三足鼎立。<\/li>\n  <li><strong>Claude Opus 4.7<\/strong>：Anthropic 最新版本，主打复杂软件工程和长链路 agent 任务，相比 4.6 在 code 与多步推理上有明显提升。<\/li>\n  <li><strong>Gemini 3.1 Pro<\/strong>：Google 旗舰预览版更新，长上下文与多模态能力进一步打磨，价格策略仍走性价比路线。<\/li>\n<\/ul>\n<h4>🌟 开源新势力<\/h4>\n<ul>\n  <li><strong>DeepSeek V4 系列<\/strong>：4 月发布 V4 Pro / V4 Flash，V4 Pro 支持 1M 上下文、最大输出 384K tokens，以 1/30 训练成本挑战 GPT-5.5 级别闭源模型。<\/li>\n  <li><strong>Kimi K2.6 / GLM-5.2 / Qwen3.6-Plus / MiniMax M2<\/strong>：4 月前后密集发布，Artificial Analysis 榜单中 Kimi K2.6 暂列开放权重模型第一，Intelligence Index 达 54。<\/li>\n  <li><strong>GLM-5.2<\/strong>：智谱于 6 月 16 日在 SiliconFlow 上线最新旗舰，主打 Vibe Coding 全能，已开放 API。<\/li>\n<\/ul>\n<h4>💡 趋势观察<\/h4>\n<p>2026 上半年国产开源大模型在 SWE-bench、Intelligence Index 等硬指标上已对 Claude 4 级别闭源模型形成正面对标；中国厂商在 agentic 与长上下文双线发力，DeepSeek V4 的\"低成本 + 超长上下文\"路线正成为新标杆。<\/p>","summary_comfy":"<h4>🎨 核心更新<\/h4>\n<ul>\n  <li><strong>v0.25.1 (2026-06-16)<\/strong>：合作伙伴节点更新，Kling V3-Turbo 模型支持正式加入 (#14528)。<\/li>\n  <li><strong>v0.25.0 (2026-06-16)<\/strong>：新增 10-bit 视频支持，集成 SCAIL-2（角色替换视频编辑）与 Bernini-R（Wan 系列）模型，Bria / Krea 等新合作伙伴 API 节点上架。<\/li>\n  <li>Google 模型支持同步更新，OpenAI API 节点修复若干兼容性问题，Comfy Desktop 概念图也在 6 月 12 日完成重构。<\/li>\n<\/ul>\n<h4>📦 新模型/插件<\/h4>\n<ul>\n  <li><strong>SCAIL-2<\/strong>：端到端 in-context 角色动画模型，告别 ControlNet 依赖，工作流更轻量。<\/li>\n  <li><strong>Bernini-R<\/strong>：基于 Wan 的视频编辑与主体替换模型，适合长视频一致性处理。<\/li>\n  <li><strong>LTX-2.3 / Licon-MSR / Kling V3-Turbo<\/strong>：社区高频讨论的新模型组合，可显著拓展视频生成工作流。<\/li>\n<\/ul>","summary_robot":"<h4>🦾 产业动态<\/h4>\n<ul>\n  <li><strong>工信部+国资委专项行动<\/strong>：6 月 8 日联合印发 2026 年度人形机器人与具身智能实景实训通知（工信厅联科函〔2026〕256 号），聚焦工业、服务、特种场景，目标打造百个高价值应用。<\/li>\n  <li><strong>2025 全球出货 1.8 万台<\/strong>：销售额约 4.4 亿美元，同比增长约 508%，中国厂商占主导地位。<\/li>\n  <li><strong>2026 预计同比 +94%<\/strong>：TrendForce 预估中国人形机器人产量大幅增长，宇树、智元合计份额近 80%。<\/li>\n<\/ul>\n<h4>🌍 中国厂商<\/h4>\n<ul>\n  <li><strong>宇树科技<\/strong>：2025 全年人形机器人实际出货超 5500 台，本体量产下线超 6500 台，王兴兴带领 G1/H2 亮相展示全自主集体控制技术。<\/li>\n  <li><strong>智元机器人<\/strong>：出货约 5200 台，新增人形机器人生产订单超万台，量产进度领先；首席科学家罗剑岚强调规模化将反哺机器人\"进化\"。<\/li>\n  <li><strong>傅利叶<\/strong>：CES 2026 首次登陆，全尺寸人形机器人 GR-3 凭亲和工业设计与多模态交互成为焦点；优必选 2026 产能规划达 10000 台。<\/li>\n<\/ul>"};
+</script>
+
+<script>
+const DATA_FILE = './daily_info.json';
+
+function fmtNum(n,d=2){if(n==null||isNaN(n))return'--';return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function pctClass(v){const n=parseFloat(v);if(isNaN(n))return'flat';return n>=0?'up':'down'}
+function pctStr(v){const n=parseFloat(v);if(isNaN(n))return'--';return (n>=0?'+':'')+fmtNum(n,2)+'%'}
+
+function setMetric(id,id_c,price,chg,pct){
+  document.getElementById(id).textContent = price;
+  const cls = pctClass(chg);
+  const el = document.getElementById(id_c);
+  el.textContent = pctStr(pct);
+  el.className = 'c ' + cls;
+}
+
+async function loadAll(){
+  document.getElementById('updateTime').textContent = '载入中...';
+  let data = null;
+  try{
+    const r = await fetch(DATA_FILE + '?t=' + Date.now());
+    if(r.ok){ data = await r.json(); }
+  }catch(e){}
+  if(!data && typeof EMBEDDED_DATA !== 'undefined' && EMBEDDED_DATA){
+    data = EMBEDDED_DATA;
+    document.getElementById('updateTime').textContent = '📦 内嵌数据（离线模式）';
+  }
+  if(!data){
+    document.getElementById('updateTime').textContent = '❌ 载入失败：请运行 refresh_dashboard.bat';
+    return;
+  }
+  renderAll(data);
+  if(document.getElementById('updateTime').textContent.indexOf('载入') === 0 ||
+     document.getElementById('updateTime').textContent.indexOf('内嵌') === 0){
+    const t = new Date();
+    document.getElementById('updateTime').textContent = '更新于 ' + t.toLocaleString('zh-CN',{hour12:false});
+  }
+}
+
+function renderAll(d){
+  if(d.metals && d.metals.gold) setMetric('m_xau','m_xau_c', fmtNum(d.metals.gold.price,2), d.metals.gold.pct, d.metals.gold.pct);
+  if(d.stocks_us){
+    const spx = d.stocks_us.find(s=>s.name.includes('标普'));
+    const ixic = d.stocks_us.find(s=>s.name.includes('纳'));
+    if(spx) setMetric('m_spx','m_spx_c', fmtNum(spx.price,2), spx.pct, spx.pct);
+    if(ixic) setMetric('m_ixic','m_ixic_c', fmtNum(ixic.price,2), ixic.pct, ixic.pct);
+  }
+  if(d.stocks_hk){
+    const hsi = d.stocks_hk.find(s=>s.name.includes('恒生指数'));
+    if(hsi) setMetric('m_hsi','m_hsi_c', fmtNum(hsi.price,2), hsi.pct, hsi.pct);
+  }
+  if(d.stocks_a){
+    const sh = d.stocks_a.find(s=>s.name.includes('上证'));
+    if(sh) setMetric('m_sh','m_sh_c', fmtNum(sh.price,2), sh.pct, sh.pct);
+  }
+
+  const metals = document.getElementById('metals');
+  if(d.metals){
+    let h = '';
+    if(d.metals.gold) h += metalRow(d.metals.gold);
+    if(d.metals.silver) h += metalRow(d.metals.silver);
+    metals.innerHTML = h || '<div class="empty">暂无数据</div>';
+  }
+
+  const aDiv = document.getElementById('aShares');
+  if(d.stocks_a) aDiv.innerHTML = d.stocks_a.map(idxRow).join('') || '<div class="empty">暂无数据</div>';
+  const hkDiv = document.getElementById('hkStocks');
+  if(d.stocks_hk) hkDiv.innerHTML = d.stocks_hk.map(idxRow).join('') || '<div class="empty">暂无数据</div>';
+  const usDiv = document.getElementById('usStocks');
+  if(d.stocks_us) usDiv.innerHTML = d.stocks_us.map(idxRow).join('') || '<div class="empty">暂无数据</div>';
+
+  const ssd = document.getElementById('ssdList');
+  if(d.hardware && d.hardware.ssd) ssd.innerHTML = d.hardware.ssd.map(hwRow).join('') || '<div class="empty">暂无数据</div>';
+  const ram = document.getElementById('ramList');
+  if(d.hardware && d.hardware.ram) ram.innerHTML = d.hardware.ram.map(hwRow).join('') || '<div class="empty">暂无数据</div>';
+  const gpu = document.getElementById('gpuList');
+  if(d.hardware && d.hardware.gpu) gpu.innerHTML = d.hardware.gpu.map(hwRow).join('') || '<div class="empty">暂无数据</div>';
+
+  renderSummary('aiSummary', d.summary_ai);
+  renderSummary('comfySummary', d.summary_comfy);
+  renderSummary('robotSummary', d.summary_robot);
+}
+
+function renderSummary(id, html){
+  const el = document.getElementById(id);
+  if(!html || html.trim() === ''){
+    el.innerHTML = '<div class="empty">暂无总结（等待明日 cron 生成）</div>';
+    return;
+  }
+  el.innerHTML = html;
+}
+
+function metalRow(m){
+  const cls = pctClass(m.pct);
+  return `<div class="row">
+    <div class="name">${m.name}<br><span style="font-size:10px;color:var(--muted)">${m.unit||''}</span></div>
+    <div class="val">
+      <div class="price">${fmtNum(m.price,2)}</div>
+      <div class="${cls}">${pctStr(m.pct)}</div>
+    </div>
+  </div>`;
+}
+
+function idxRow(s){
+  const cls = pctClass(s.pct);
+  return `<div class="row">
+    <div class="name">${s.name}</div>
+    <div class="val">
+      <div class="price">${fmtNum(s.price,2)}</div>
+      <div class="${cls}">${pctStr(s.pct)}</div>
+    </div>
+  </div>`;
+}
+
+function hwRow(h){
+  return `<div class="row">
+    <div class="name">${h.name}<br><span style="font-size:10px;color:var(--muted)">${h.note||''}</span></div>
+    <div class="val">
+      <div class="price" style="font-size:14px">¥${h.price}</div>
+      ${h.change?`<div class="${pctClass(h.change)}">${pctStr(h.change)}</div>`:''}
+    </div>
+  </div>`;
+}
+
+let refreshTimer;
+function startAutoRefresh(){
+  if(refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(async ()=>{
+    try{
+      const r = await fetch(DATA_FILE + '?t=' + Date.now());
+      const data = await r.json();
+      renderAll(data);
+      const t = new Date();
+      document.getElementById('updateTime').textContent = '更新于 ' + t.toLocaleString('zh-CN',{hour12:false}) + ' (自动)';
+      const toast = document.getElementById('autoRefreshToast');
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'),2000);
+    }catch(e){}
+  }, 5*60*1000);
+}
+
+loadAll();
+startAutoRefresh();
+</script>
+
+</body>
+</html>

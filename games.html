@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏投放管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+body{display:flex;min-height:100vh;background:#f5f0f5;}
+.sidebar{width:220px;background:#fff;border-right:1px solid #eee;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-logo{padding:18px 16px;font-size:18px;font-weight:800;color:#6a5acd;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;}
+.sidebar-logo .icon{width:28px;height:28px;background:linear-gradient(135deg,#6a5acd,#9b59b6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-item{display:flex;align-items:center;padding:10px 16px;cursor:pointer;color:#444;font-size:13px;transition:all .1s;border-left:3px solid transparent;text-decoration:none;}
+.nav-item:hover{background:#f8f0ff;color:#6a5acd;}
+.nav-item.active{background:#f0e6ff;color:#6a5acd;border-left-color:#6a5acd;font-weight:600;}
+.nav-item .ico{width:20px;text-align:center;margin-right:10px;font-size:15px;}
+.nav-item .arrow{margin-left:auto;font-size:10px;color:#bbb;}
+.nav-divider{height:1px;background:#f0f0f0;margin:6px 16px;}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:#f5f0f5;}
+.top-header{display:flex;align-items:center;padding:12px 24px;background:#1a1a2e;gap:20px;}
+.top-header a{color:rgba(255,255,255,0.75);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.top-header a:hover{color:#fff;}
+.top-header .brand{font-weight:700;color:#fff;}
+.top-header .brand .tag{font-size:10px;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:999px;color:rgba(255,255,255,0.6);margin-left:4px;}
+.top-header .right{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);}
+.content{padding:20px 24px;flex:1;overflow:auto;}
+.page-title{font-size:20px;font-weight:700;color:#333;margin-bottom:4px;display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.page-sub{font-size:13px;color:#999;margin-bottom:16px;}
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.filter-bar select,.filter-bar input{padding:8px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;background:#fff;outline:none;}
+.btn{padding:8px 18px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:all .15s;}
+.btn-primary{background:#6a5acd;color:#fff;}
+.btn-primary:hover{background:#5a4abd;}
+.btn-success{background:#1a9d5a;color:#fff;}
+
+/* 4-tab 切换 */
+.tabs-row{display:flex;gap:6px;margin:14px 0 12px;flex-wrap:wrap;}
+.tab-btn{
+  padding:8px 18px;border:1px solid #e0d0f0;background:#fff;border-radius:999px;
+  font-size:13px;font-weight:500;color:#6a5acd;cursor:pointer;transition:all .15s;
+}
+.tab-btn:hover{background:#f3eaff;border-color:#6a5acd;}
+.tab-btn.active{background:#6a5acd;color:#fff;border-color:#6a5acd;box-shadow:0 2px 8px rgba(106,90,205,.3);}
+
+/* 显示范围按钮组 */
+.range-btns{display:flex;gap:6px;align-items:center;margin-left:auto;}
+.range-btn{
+  padding:5px 12px;border:1px solid #d4d4d8;background:#fff;border-radius:6px;
+  font-size:12px;color:#52525b;cursor:pointer;transition:all .15s;
+}
+.range-btn:hover{background:#f4f4f5;border-color:#a1a1aa;}
+.range-btn.active{background:#6a5acd;color:#fff;border-color:#6a5acd;font-weight:600;}
+.btn-success:hover{background:#15804a;}
+.btn-danger{background:#e74c3c;color:#fff;padding:4px 10px;font-size:11px;}
+.btn-danger:hover{background:#c0392b;}
+.btn-outline{background:transparent;border:1px solid #6a5acd;color:#6a5acd;}
+.btn-outline:hover{background:#f0e6ff;}
+.summary-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.sum-card{flex:1;min-width:130px;background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.sum-card .label{font-size:12px;color:#999;}
+.sum-card .value{font-size:20px;font-weight:700;color:#333;margin-top:4px;}
+.sum-card .value .unit{font-size:13px;color:#999;font-weight:400;}
+/* ========== 表格 sticky 列样式 ========== */
+.table-wrap{
+  overflow-x:auto;
+  border-radius:14px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.04);
+  margin-bottom:16px;
+}
+/* ========== 表格基础样式 ========== */
+table{font-size:12px;border-collapse:collapse;border-spacing:0;min-width:1200px;width:max-content;background:#fff;}
+th{padding:10px 8px;text-align:center;border:1px solid #e8dff5;white-space:nowrap;font-weight:600;color:#6a5acd;background:#f8f0ff;}
+td{padding:8px;text-align:center;border:1px solid #f5f0f5;white-space:nowrap;height:34px;color:#333;background:#fff;}
+
+/* tfoot 合计行：边框加粗 */
+tfoot td{
+  background:#f8f0ff !important;
+  font-weight:700 !important;
+  color:#6a5acd;
+  border:2px solid #e8dff5 !important;
+  position:relative;
+  z-index:2;
+}
+
+/* 关键：让 sticky 元素各自创建 stacking context */
+th.sticky, td.sticky{
+  position:sticky;
+  background-clip:padding-box;
+  /* left 值由 inline style 设置 */
+}
+/* sticky th：紫色背景 + 右边框 */
+th.sticky{
+  background:#f3eaff !important;
+  border-right:2px solid #c4b5fd !important;
+  border-left:0 !important;
+  z-index:5;
+}
+/* sticky td：白色背景 + 右边框 */
+td.sticky{
+  background:#fff !important;
+  border-right:2px solid #c4b5fd !important;
+  border-left:0 !important;
+  z-index:3;
+}
+/* hover 时给 sticky td 重染色，z-index 提升防止被覆盖 */
+tr:hover td.sticky{
+  background:#f3eaff !important;
+  border-right-color:#6a5acd !important;
+  z-index:4;
+}
+
+/* tfoot 合计行 sticky 列：紫色背景 */
+tfoot td.sticky{
+  background:#f8f0ff !important;
+  font-weight:600;
+  border-right:2px solid #c4b5fd !important;
+  z-index:4;
+}
+
+/* 关键修复：tbody 每行 tr 创建 stacking context */
+.table-wrap tbody tr{
+  position:relative;
+  z-index:1;
+}
+
+/* 非 sticky 单元格保持 z-index 低 */
+.table-wrap th:not(.sticky), .table-wrap td:not(.sticky){
+  position:relative;
+  z-index:1;
+}
+.game-name{font-weight:600;color:#333;text-align:left;}
+.uploader{color:#6a5acd;font-weight:600;text-align:left;}
+.num{font-variant-numeric:tabular-nums;}
+td[contenteditable="true"]:hover{background:#fffde7;cursor:text;}
+td[contenteditable="true"]:focus{outline:2px solid #6a5acd;background:#fffde7;}
+.game-name{font-weight:600;color:#333;text-align:left;}
+.uploader{color:#6a5acd;font-weight:600;text-align:left;}
+.num{font-variant-numeric:tabular-nums;}
+td[contenteditable="true"]:hover{background:#fffde7;cursor:text;}
+td[contenteditable="true"]:focus{outline:2px solid #6a5acd;background:#fffde7;}
+.edit-hint{font-size:11px;color:#bbb;margin-bottom:8px;}
+.status-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;}
+.status-normal{background:#e6f7ed;color:#1a7a3a;}
+.status-open{background:#fff3e0;color:#cc6a00;}
+.status-pause{background:#fce4ec;color:#c62828;}
+.status-down{background:#f5f5f5;color:#999;}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;justify-content:center;align-items:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:24px;width:500px;max-width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
+.modal h3{font-size:16px;margin-bottom:16px;color:#333;}
+.modal .field{margin-bottom:12px;}
+.modal .field label{display:block;font-size:12px;color:#666;margin-bottom:4px;}
+.modal .field input,.modal .field select{width:100%;padding:8px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;}
+.modal .field-row{display:flex;gap:8px;flex-wrap:wrap;}
+.modal .field-row input{flex:1;min-width:60px;}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="icon">W</div><span>我的工作台</span></div>
+  <div class="sidebar-nav">
+    <a class="nav-item" href="index.html"><span class="ico">🏠</span><span>主页</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">📊</span><span>广告投放</span><span class="arrow">›</span></div>
+    <a class="nav-item active" href="games.html"><span class="ico">🎯</span><span>游戏投放管理</span></a>
+    <a class="nav-item" href="info_dashboard.html"><span class="ico">📰</span><span>每日资讯看板</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">📋</span><span>日报分析</span></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🎮</span><span>游戏管理</span><span class="arrow">›</span></div>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="video.html"><span class="ico">🎬</span><span>视频</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">💰</span><span>收益统计</span></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🔧</span><span>常用工具</span><span class="arrow">›</span></div>
+    <a class="nav-item" href="ai.html"><span class="ico">🤖</span><span>AI助手</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">⚙️</span><span>配置</span></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="top-header">
+    <a href="index.html" class="brand">🎯 工作台<span class="tag">Beta</span></a>
+    <a href="games.html">🎮 游戏投放管理</a>
+    <a href="info_dashboard.html">📰 每日资讯看板</a>
+    <span class="right">消耗数据 · 可编辑</span>
+  </div>
+
+  <div class="content">
+      <div class="page-title">
+        <span>🎯 游戏投放管理</span>
+        <div>
+          <button class="btn btn-success" onclick="refreshData()">🔄 刷新</button>
+        </div>
+      </div>
+      <div class="page-sub">双击单元格编辑 · 数据版本 <span id="verDisplay"></span></div>
+
+      <!-- 4 个标签页 -->
+      <div class="tabs-row">
+        <button class="tab-btn active" data-tab="summary">📊 汇总</button>
+        <button class="tab-btn" data-tab="expense">💸 消耗</button>
+        <button class="tab-btn" data-tab="revenue">💰 收入</button>
+        <button class="tab-btn" data-tab="max_revenue">⭐ Max收入</button>
+      </div>
+
+      <div id="summaryRow" class="summary-row"></div>
+
+      <div class="filter-bar">
+        <select id="filterUploader" onchange="applyFilter()"><option value="">全部投手</option></select>
+        <input type="text" id="filterSearch" placeholder="搜游戏名称..." style="width:160px;" oninput="applyFilter()">
+        <span style="font-size:12px;color:#999;">共 <span id="rowCount">0</span> 行</span>
+
+        <!-- 显示范围快捷按钮（消耗/收入/Max收入/汇总 tab 都显示） -->
+        <div id="rangeButtons" class="range-btns">
+          <span style="font-size:12px;color:#999;margin-left:8px;">📅 显示范围：</span>
+          <button class="range-btn" data-days="0">全部</button>
+          <button class="range-btn" data-days="10">10天</button>
+          <button class="range-btn" data-days="30">30天</button>
+          <button class="range-btn" data-days="custom">N天</button>
+          <input type="number" id="rangeDaysInput" min="1" max="60" placeholder="天数" style="display:none;width:60px;padding:5px 8px;border:1px solid #6a5acd;border-radius:6px;font-size:12px;" />
+          <button class="range-btn" id="rangeApplyBtn" style="display:none;background:#10d68a;color:#fff;">确定</button>
+        </div>
+      </div>
+
+      <div id="tableContainer" class="table-wrap"></div>
+    </div>
+  </div>
+
+  <script>
+  // 数据来自 Excel 实时抓取（3 张表）
+  const DATA_3TABS_FILE = './games_3tabs.json';
+  const DATA_VER = 15; // 升级：加 4 个 tab
+
+  function getDates(){
+    // 默认值，后面会被 Excel 数据覆盖
+    return ["\u6b63\u5e38", "\u5907\u6ce8"];
+  }
+
+  let data = [];           // 当前 tab 渲染的数据（含 expense/revenue/max_revenue）
+  let currentTab = 'summary'; // summary | expense | revenue | max_revenue
+  let excelRecords = [];    // 来自 Excel 的原始 3-tb 数据
+
+  // === Tab 切换 ===
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      applyFilter();
+      // range 按钮 4 个 tab 都显示
+      const rangeDiv = document.getElementById('rangeButtons');
+      if(rangeDiv){
+        rangeDiv.style.display = 'flex';
+      }
+    });
+  });
+
+  // === 显示范围快捷按钮 ===
+  let displayDays = 0;  // 0 = 全部
+  // 默认 "全部" 按钮高亮
+  setTimeout(() => {
+    const allBtn = document.querySelector('.range-btn[data-days="0"]');
+    if(allBtn) allBtn.classList.add('active');
+  }, 100);
+  document.querySelectorAll('.range-btn[data-days]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.days;
+      document.querySelectorAll('.range-btn[data-days]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const input = document.getElementById('rangeDaysInput');
+      const apply = document.getElementById('rangeApplyBtn');
+      if(val === 'custom'){
+        // 显示输入框 + 确定按钮
+        input.style.display = 'inline-block';
+        apply.style.display = 'inline-block';
+        input.focus();
+      } else {
+        input.style.display = 'none';
+        apply.style.display = 'none';
+        displayDays = parseInt(val);
+        applyDaysFilter();
+      }
+    });
+  });
+  document.getElementById('rangeApplyBtn').addEventListener('click', () => {
+    const v = parseInt(document.getElementById('rangeDaysInput').value);
+    if(v && v > 0 && v <= 60){
+      displayDays = v;
+      applyDaysFilter();
+    }
+  });
+  document.getElementById('rangeDaysInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('rangeApplyBtn').click();
+  });
+
+  function applyDaysFilter(){
+    // 4 个 tab 全部生效：汇总页也要重新计算和重渲染
+    render();
+  }
+
+  // 重写 getActiveDates 以支持 N 天显示
+  function getActiveDatesFiltered(){
+    let all = getActiveDates();
+    if(displayDays > 0 && all.length > displayDays){
+      return all.slice(-displayDays);  // 取最近 N 天
+    }
+    return all;
+  }
+
+  async function loadData(){
+    // 1. 优先 fetch 来自 Excel 的 3 表 JSON（强制不缓存，避免浏览器 HTTP 缓存）
+    try{
+      const r = await fetch(DATA_3TABS_FILE + '?_=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
+      if(r.ok){
+        const j = await r.json();
+        // 用 updated_at 比较版本号，避免 localStorage 旧缓存覆盖新数据
+        const newVer = j.meta && j.meta.updated_at || '';
+        const cachedVer = localStorage.getItem('games_3tabs_ver');
+        if(cachedVer && cachedVer !== newVer){
+          console.log('[Hermes] Excel 数据有更新，清缓存并刷新', {old:cachedVer, new:newVer});
+        }
+        localStorage.setItem('games_3tabs_ver', newVer);
+        excelRecords = j.records || [];
+        window._excelDates = j.dates || getDates();
+        data = excelRecords.map(rec => ({
+          uploader: rec.uploader,
+          game: rec.game,
+          pkg: rec.pkg,
+          backend: rec.backend,
+          status: rec.status,
+          expense: rec.expense || [],
+          revenue: rec.revenue || [],
+          max_revenue: rec.max_revenue || [],
+        }));
+        // 缓存到 localStorage（永远用最新覆盖）
+        try { localStorage.setItem('games_3tabs_cache', JSON.stringify(j)); } catch(e){}
+        document.getElementById('verDisplay').textContent = 'v' + DATA_VER + ' (Excel · ' + (newVer ? newVer.substring(11,16) : '') + ')';
+      } else {
+        throw new Error('fetch failed');
+      }
+    }catch(e){
+      // 回退到缓存或默认
+      const cached = localStorage.getItem('games_3tabs_cache');
+      if(cached){
+        try{
+          const j = JSON.parse(cached);
+          excelRecords = j.records || [];
+          window._excelDates = j.dates || getDates();
+          data = excelRecords.map(rec => ({
+            uploader: rec.uploader, game: rec.game, pkg: rec.pkg,
+            backend: rec.backend, status: rec.status,
+            expense: rec.expense || [], revenue: rec.revenue || [],
+            max_revenue: rec.max_revenue || [],
+          }));
+          document.getElementById('verDisplay').textContent = 'v' + DATA_VER + ' (缓存)';
+        }catch(e2){ fallbackDefault(); }
+      } else {
+        fallbackDefault();
+      }
+    }
+    render();
+    if(localStorage.getItem('refresh_notice')){
+      localStorage.removeItem('refresh_notice');
+      setTimeout(() => alert('✅ 数据已刷新'), 100);
+    }
+  }
+
+  function fallbackDefault(){
+    data = DEFAULT_DATA.map(r => ({
+      uploader: r.uploader, game: r.game, pkg: r.pkg,
+      backend: r.backend, status: r.status,
+      expense: r.data || [], revenue: r.data.map(x=>'-'), max_revenue: r.data.map(x=>'-'),
+    }));
+    document.getElementById('verDisplay').textContent = 'v' + DATA_VER + ' (默认)';
+  }
+
+  // 兜底默认数据（用 game 名称填充字段名）
+  const DEFAULT_DATA = [
+];
+  for(let i=0;i<15;i++) DEFAULT_DATA.push({uploader:'',game:'',pkg:'',backend:'',status:'正常',data:[]});
+
+function getActiveDates(){
+  // 优先用 Excel 的 dates，否则用默认
+  return window._excelDates || getDates();
+}
+
+function getActiveData(r){
+  // 根据当前 tab 返回该游戏的对应字段数据
+  if(currentTab === 'expense') return r.expense || [];
+  if(currentTab === 'revenue') return r.revenue || [];
+  if(currentTab === 'max_revenue') return r.max_revenue || [];
+  // summary tab: 把 3 表数据拼接（先消耗后收入后 max收入）
+  return [
+    ...(r.expense || []),
+    ...(r.revenue || []),
+    ...(r.max_revenue || []),
+  ];
+}
+
+function getActiveLabel(){
+  if(currentTab === 'expense') return '消耗';
+  if(currentTab === 'revenue') return '收入';
+  if(currentTab === 'max_revenue') return 'Max收入';
+  return '汇总(消耗/收入/Max收入)';
+}
+
+function addDateColumn(){
+  let label = prompt('请输入新日期标签（如 0618）：');
+  if(!label || !label.trim()) return;
+  label = label.trim();
+  let dates = getActiveDatesFiltered();
+  dates.push(label);
+  window._excelDates = dates;
+  data.forEach(r => {
+    r.expense.push('-');
+    r.revenue.push('-');
+    r.max_revenue.push('-');
+  });
+  // 保存
+  const j = {records: data.map(r=>({uploader:r.uploader,game:r.game,pkg:r.pkg,backend:r.backend,status:r.status,expense:r.expense,revenue:r.revenue,max_revenue:r.max_revenue})), dates};
+  localStorage.setItem('games_3tabs_cache', JSON.stringify(j));
+  render();
+}
+
+function collectEdits(){
+  let rows = document.querySelectorAll('table tbody tr');
+  data.forEach((r, i) => {
+    let tr = rows[i];
+    if(!tr) return;
+    let cells = tr.querySelectorAll('td');
+    if(cells.length < 6) return;
+    r.uploader = cells[0].innerText.trim();
+    r.game = cells[1].innerText.trim();
+    r.pkg = cells[2].innerText.trim();
+    r.backend = cells[3].innerText.trim();
+    let sel = cells[4].querySelector('select');
+    if(sel) r.status = sel.value;
+    let activeData = getActiveData(r);
+    let dates = getActiveDatesFiltered();
+    // 计算偏移：dates 是裁剪后的（比如最后 10 天），activeData 是完整 99 天
+    const allDates = getActiveDates();
+    let dateOffset = 0;
+    if(dates.length < allDates.length){
+      dateOffset = allDates.length - dates.length;
+    }
+    // 编辑：把 cells[5+j] 的值写回 activeData[dateOffset+j]（原数组下标）
+    for(let j=0;j<dates.length;j++){
+      let v = cells[5+j] ? cells[5+j].innerText.trim().replace(/,/g,'') : '-';
+      if(dateOffset + j < activeData.length){
+        activeData[dateOffset + j] = v || '-';
+      }
+    }
+    // 写回（activeData 已经是引用，更新了原数组，不用再赋值）
+  });
+  // 缓存编辑
+  const j = {records: data.map(r=>({uploader:r.uploader,game:r.game,pkg:r.pkg,backend:r.backend,status:r.status,expense:r.expense,revenue:r.revenue,max_revenue:r.max_revenue})), dates: window._excelDates || getDates()};
+  localStorage.setItem('games_3tabs_cache', JSON.stringify(j));
+}
+
+function render(){
+  let uploaders = [...new Set(data.map(d=>d.uploader).filter(Boolean))];
+  let sel = document.getElementById('filterUploader');
+  let curVal = sel.value;
+  sel.innerHTML = '<option value="">全部投手</option>' + uploaders.map(u=>`<option value="${u}">${u}</option>`).join('');
+  sel.value = curVal;
+  applyFilter();
+  updateSummary();
+}
+
+function applyFilter(){
+  let uploader = document.getElementById('filterUploader').value;
+  let search = document.getElementById('filterSearch').value.toLowerCase();
+  let filtered = data.filter(d=>{
+    if(uploader && d.uploader!==uploader) return false;
+    if(search && !(d.game||'').toLowerCase().includes(search) && !(d.pkg||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  buildTable(filtered);
+  document.getElementById('rowCount').textContent = filtered.length;
+}
+
+function buildTable(rows){
+  let dates = getActiveDatesFiltered();
+  let cw = [60, 150, 210, 140, 80];
+  let lp = []; let cum = 0;
+  cw.forEach(w=>{lp.push(cum); cum+=w;});
+
+  // summary tab: 12 列（5 sticky + 7 汇总）
+  let groupHeaders = '';
+  if(currentTab === 'summary'){
+    // 第一行：sticky 列组（占位，背景灰）+ 汇总数据大标题
+    groupHeaders = `<tr>
+      <th class="sticky" style="left:0;width:60px;min-width:60px;background:#f8fafc;border-right:2px solid #c4b5fd;"></th>
+      <th class="sticky" style="left:60px;width:150px;min-width:150px;background:#f8fafc;border-right:2px solid #c4b5fd;"></th>
+      <th class="sticky" style="left:210px;width:210px;min-width:210px;background:#f8fafc;border-right:2px solid #c4b5fd;"></th>
+      <th class="sticky" style="left:420px;width:140px;min-width:140px;background:#f8fafc;border-right:2px solid #c4b5fd;"></th>
+      <th class="sticky" style="left:560px;width:80px;min-width:80px;background:#f8fafc;border-right:2px solid #c4b5fd;"></th>
+      <th colspan="7" style="background:#fef3c7;color:#92400e;text-align:center;border-bottom:2px solid #fcd34d;">📊 汇总数据</th>
+    </tr><tr>
+      <th class="sticky" style="left:0;width:60px;min-width:60px;">投手</th>
+      <th class="sticky" style="left:60px;width:150px;min-width:150px;">游戏名称</th>
+      <th class="sticky" style="left:210px;width:210px;min-width:210px;">包名</th>
+      <th class="sticky" style="left:420px;width:140px;min-width:140px;">后台名称</th>
+      <th class="sticky" style="left:560px;width:80px;min-width:80px;">状态</th>
+      <th style="background:#fef9c3;color:#854d0e;width:130px;min-width:130px;">消耗汇总</th>
+      <th style="background:#dbeafe;color:#1e40af;width:130px;min-width:130px;">收入汇总</th>
+      <th style="background:#fce7f3;color:#9d174d;width:130px;min-width:130px;">Max汇总</th>
+      <th style="background:#fef2f2;color:#991b1b;width:120px;min-width:120px;">收入-消耗<br><span style="font-size:9px;opacity:.7;">(差值)</span></th>
+      <th style="background:#faf5ff;color:#581c87;width:120px;min-width:120px;">Max收入-消耗<br><span style="font-size:9px;opacity:.7;">(差值)</span></th>
+      <th style="background:#dcfce7;color:#166534;width:110px;min-width:110px;">投放ROI<br><span style="font-size:9px;opacity:.7">(收入/消耗)</span></th>
+      <th style="background:#f3e8ff;color:#6b21a8;width:110px;min-width:110px;">Max ROI<br><span style="font-size:9px;opacity:.7">(Max/消耗)</span></th>
+    </tr>`;
+  } else {
+    // 消耗/收入/Max收入 单 tab: 5 sticky + 日期 + 加号
+    groupHeaders = `<tr>
+      <th class="sticky" style="left:0;width:60px;min-width:60px;">投手</th>
+      <th class="sticky" style="left:60px;width:150px;min-width:150px;">游戏名称</th>
+      <th class="sticky" style="left:210px;width:210px;min-width:210px;">包名</th>
+      <th class="sticky" style="left:420px;width:140px;min-width:140px;">后台名称</th>
+      <th class="sticky" style="left:560px;width:80px;min-width:80px;">状态</th>`;
+    dates.forEach(d => groupHeaders += `<th style="width:60px;min-width:60px;">${d}</th>`);
+    groupHeaders += `<th style="width:40px;min-width:40px;background:#e8f5e9;color:#1a9d5a;font-size:18px;cursor:pointer;" onclick="addDateColumn()">+</th></tr>`;
+  }
+
+  let h = `<table><thead>${groupHeaders}</thead><tbody>`;
+  rows.forEach((r,i)=>{
+    h+=`<tr>`;
+    h+=`<td class="sticky" style="left:0;width:60px;min-width:60px;">${r.uploader}</td>`;
+    h+=`<td class="sticky" style="left:60px;width:150px;min-width:150px;">${r.game||'-'}</td>`;
+    h+=`<td class="sticky" style="left:210px;width:210px;min-width:210px;">${r.pkg||'-'}</td>`;
+    h+=`<td class="sticky" style="left:420px;width:140px;min-width:140px;">${r.backend||'-'}</td>`;
+    let sc = r.status==='正常'?'#e6f7ed':r.status==='开跑'?'#fff3e0':r.status==='暂停'?'#fce4ec':'#f5f5f5';
+    let tc = r.status==='正常'?'#1a7a3a':r.status==='开跑'?'#cc6a00':r.status==='暂停'?'#c62828':'#999';
+    h+=`<td class="sticky" style="left:560px;width:80px;min-width:80px;">
+      <select style="padding:2px 8px;border-radius:999px;border:none;font-size:11px;font-weight:600;background:${sc};color:${tc};outline:none;cursor:pointer;" onchange="this.style.background=getComputedStyle(this.options[this.selectedIndex]).backgroundColor">
+        <option value="正常" ${r.status==='正常'?'selected':''} style="background:#e6f7ed;color:#1a7a3a">正常</option>
+        <option value="开跑" ${r.status==='开跑'?'selected':''} style="background:#fff3e0;color:#cc6a00">开跑</option>
+        <option value="暂停" ${r.status==='暂停'?'selected':''} style="background:#fce4ec;color:#c62828">暂停</option>
+        <option value="已下架" ${r.status==='已下架'?'selected':''} style="background:#f5f5f5;color:#999">已下架</option>
+      </select></td>`;
+
+    if(currentTab === 'summary'){
+      // 7 列汇总：消耗/收入/Max/收入-消耗/Max收入-消耗/投放ROI/Max ROI（ROI 在最后）
+      // 根据 displayDays 截取数据范围（全部 / 最近 N 天）
+      const allDates = getActiveDates();
+      let dateOffset = 0;
+      if(displayDays > 0 && allDates.length > displayDays){
+        dateOffset = allDates.length - displayDays;
+      }
+      const sliceData = (arr) => arr.slice(dateOffset);
+      let total_exp = sumNum(sliceData(r.expense));
+      let total_rev = sumNum(sliceData(r.revenue));
+      let total_max = sumNum(sliceData(r.max_revenue));
+      let diff_rev = total_rev - total_exp;  // 收入-消耗
+      let diff_max = total_max - total_exp;  // Max收入-消耗
+      let roi = total_exp > 0 ? (total_rev / total_exp * 100) : null;
+      let maxRoi = total_exp > 0 ? (total_max / total_exp * 100) : null;
+      // 顶部 KPI 卡片显示当前范围提示
+      const rangeLabel = displayDays === 0 ? '全部' : `最近${displayDays}天`;
+      h += `<td contenteditable="true" style="background:#fef9c3;text-align:right;font-weight:600;" title="数据范围: ${rangeLabel}">${fmtNum(total_exp, 0)}</td>`;
+      h += `<td contenteditable="true" style="background:#eff6ff;text-align:right;font-weight:600;" title="数据范围: ${rangeLabel}">${fmtNum(total_rev, 0)}</td>`;
+      h += `<td contenteditable="true" style="background:#fdf2f8;text-align:right;font-weight:600;" title="数据范围: ${rangeLabel}">${fmtNum(total_max, 0)}</td>`;
+      // 差值列（在 ROI 前面）
+      let diff_rev_str = (diff_rev >= 0 ? '+' : '') + fmtNum(diff_rev, 0);
+      let diff_max_str = (diff_max >= 0 ? '+' : '') + fmtNum(diff_max, 0);
+      let diff_rev_color = diff_rev >= 0 ? '#15803d' : '#dc2626';
+      let diff_max_color = diff_max >= 0 ? '#7c3aed' : '#dc2626';
+      h += `<td contenteditable="true" style="background:#fef2f2;text-align:right;font-weight:700;color:${diff_rev_color};">${diff_rev_str}</td>`;
+      h += `<td contenteditable="true" style="background:#faf5ff;text-align:right;font-weight:700;color:${diff_max_color};">${diff_max_str}</td>`;
+      // ROI 在最后两列
+      h += `<td contenteditable="true" style="background:#f0fdf4;text-align:right;font-weight:600;color:${roi===null?'#999':(roi>=100?'#166534':'#c2410c')};">${roi===null?'-':roi.toFixed(1)+'%'}</td>`;
+      h += `<td contenteditable="true" style="background:#faf5ff;text-align:right;font-weight:600;color:${maxRoi===null?'#999':(maxRoi>=100?'#6b21a8':'#c2410c')};">${maxRoi===null?'-':maxRoi.toFixed(1)+'%'}</td>`;
+    } else {
+      // 消耗/收入/Max收入 tab：每日数据列
+      // dates 是裁剪后的（比如最后 10 天），activeData 是完整的 99 天数组
+      // 需要算出 dates 对应的原始下标偏移量
+      const allDates = getActiveDates();
+      let dateOffset = 0;
+      if(dates.length < allDates.length){
+        // dates 是最后 N 个，所以从 allDates.length - dates.length 开始取
+        dateOffset = allDates.length - dates.length;
+      }
+      let activeData = getActiveData(r);
+      for(let j=0;j<dates.length;j++){
+        h += `<td contenteditable="true">${(activeData[dateOffset + j]||'-').replace(/,/g,'')}</td>`;
+      }
+      h += `<td></td>`;
+    }
+    h += `</tr>`;
+  });
+
+  // 底部 tfoot 汇总行
+  h += `</tbody><tfoot><tr>`;
+  h += `<td class="sticky" style="left:0;width:60px;min-width:60px;text-align:right;background:#f8f0ff;">📊</td>`;
+  h += `<td class="sticky" style="left:60px;width:150px;min-width:150px;text-align:right;background:#f8f0ff;">合计</td>`;
+  h += `<td class="sticky" style="left:210px;width:210px;min-width:210px;background:#f8f0ff;"></td>`;
+  h += `<td class="sticky" style="left:420px;width:140px;min-width:140px;background:#f8f0ff;"></td>`;
+  h += `<td class="sticky" style="left:560px;width:80px;min-width:80px;background:#f8f0ff;"></td>`;
+
+  if(currentTab === 'summary'){
+    // 同样按 displayDays 截取
+    const allDates = getActiveDates();
+    let dateOffset = 0;
+    if(displayDays > 0 && allDates.length > displayDays){
+      dateOffset = allDates.length - displayDays;
+    }
+    const sliceData = (arr) => arr.slice(dateOffset);
+    let tot_exp = 0, tot_rev = 0, tot_max = 0;
+    rows.forEach(r => {
+      tot_exp += sumNum(sliceData(r.expense));
+      tot_rev += sumNum(sliceData(r.revenue));
+      tot_max += sumNum(sliceData(r.max_revenue));
+    });
+    let diff_rev_total = tot_rev - tot_exp;
+    let diff_max_total = tot_max - tot_exp;
+    let roi = tot_exp > 0 ? (tot_rev / tot_exp * 100).toFixed(1) + '%' : '-';
+    let maxRoi = tot_exp > 0 ? (tot_max / tot_exp * 100).toFixed(1) + '%' : '-';
+    let diff_rev_str = (diff_rev_total >= 0 ? '+' : '') + fmtNum(diff_rev_total, 0);
+    let diff_max_str = (diff_max_total >= 0 ? '+' : '') + fmtNum(diff_max_total, 0);
+    h += `<td style="background:#fef9c3;font-weight:700;text-align:right;">${fmtNum(tot_exp, 0)}</td>`;
+    h += `<td style="background:#eff6ff;font-weight:700;text-align:right;">${fmtNum(tot_rev, 0)}</td>`;
+    h += `<td style="background:#fdf2f8;font-weight:700;text-align:right;">${fmtNum(tot_max, 0)}</td>`;
+    h += `<td style="background:#fef2f2;font-weight:700;text-align:right;color:${diff_rev_total>=0?'#15803d':'#dc2626'};">${diff_rev_str}</td>`;
+    h += `<td style="background:#faf5ff;font-weight:700;text-align:right;color:${diff_max_total>=0?'#7c3aed':'#dc2626'};">${diff_max_str}</td>`;
+    h += `<td style="background:#f0fdf4;font-weight:700;text-align:right;color:#166534;">${roi}</td>`;
+    h += `<td style="background:#faf5ff;font-weight:700;text-align:right;color:#6b21a8;">${maxRoi}</td>`;
+  } else {
+    // 计算偏移：dates 是裁剪后的（比如最后 10 天），activeData 是完整 99 天
+    const allDates = getActiveDates();
+    let dateOffset = 0;
+    if(dates.length < allDates.length){
+      dateOffset = allDates.length - dates.length;
+    }
+    for(let j=0;j<dates.length;j++){
+      let s=0,has=false;
+      rows.forEach(r=>{
+        let activeData = getActiveData(r);
+        let n=parseFloat((activeData[dateOffset + j]||'-').replace(/,/g,''));
+        if(!isNaN(n)){s+=n;has=true;}
+      });
+      h += `<td style="font-weight:700;">${has?s.toLocaleString(undefined,{maximumFractionDigits:1}):'-'}</td>`;
+    }
+    h += `<td></td>`;
+  }
+  h += `</tr></tfoot></table>`;
+  document.getElementById('tableContainer').innerHTML = h;
+}
+
+function sumNum(arr){
+  if(!arr) return 0;
+  let s = 0;
+  arr.forEach(v => {
+    let n = parseFloat((v||'0').toString().replace(/,/g,''));
+    if(!isNaN(n)) s += n;
+  });
+  return s;
+}
+
+function fmtNum(n, d=2){
+  if(n==null||isNaN(n)) return '-';
+  return Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+
+function updateSummary(){
+  // 根据 displayDays 截取（顶部 KPI 卡片跟当前显示范围一致）
+  const allDates = getActiveDates();
+  let dateOffset = 0;
+  if(displayDays > 0 && allDates.length > displayDays){
+    dateOffset = allDates.length - displayDays;
+  }
+  const sliceData = (arr) => (arr||[]).slice(dateOffset);
+  const rangeLabel = displayDays === 0 ? '全部' : `最近${displayDays}天`;
+
+  let games = data.filter(d=>d.game && d.game!=='-').length;
+  let uploaders = new Set(data.map(d=>d.uploader).filter(Boolean)).size;
+  let total_expense=0, total_revenue=0, total_max=0;
+  data.forEach(r=>{
+    sliceData(r.expense).forEach(v=>{let n=parseFloat((v||'0').toString().replace(/,/g,''));if(!isNaN(n))total_expense+=n;});
+    sliceData(r.revenue).forEach(v=>{let n=parseFloat((v||'0').toString().replace(/,/g,''));if(!isNaN(n))total_revenue+=n;});
+    sliceData(r.max_revenue).forEach(v=>{let n=parseFloat((v||'0').toString().replace(/,/g,''));if(!isNaN(n))total_max+=n;});
+  });
+  let active = data.filter(d=>d.status==='正常'||d.status==='开跑').length;
+  let roi = total_expense>0 ? (total_revenue/total_expense*100).toFixed(1) : '-';
+  document.getElementById('summaryRow').innerHTML = `
+    <div class="sum-card"><div class="label">在投游戏</div><div class="value">${games} <span class="unit">款</span></div></div>
+    <div class="sum-card"><div class="label">投手数</div><div class="value">${uploaders} <span class="unit">人</span></div></div>
+    <div class="sum-card"><div class="label">总消耗 <span style="font-size:10px;color:#999">(${rangeLabel})</span></div><div class="value">${total_expense.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+    <div class="sum-card"><div class="label">总收入 <span style="font-size:10px;color:#999">(${rangeLabel})</span></div><div class="value">${total_revenue.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+    <div class="sum-card"><div class="label">Max总收入 <span style="font-size:10px;color:#999">(${rangeLabel})</span></div><div class="value">${total_max.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+    <div class="sum-card"><div class="label">ROI <span style="font-size:10px;color:#999">(${rangeLabel})</span></div><div class="value">${roi}%</div></div>
+    <div class="sum-card"><div class="label">活跃中</div><div class="value">${active} <span class="unit">款</span></div></div>`;
+}
+
+function refreshData(){
+  localStorage.removeItem('games_3tabs_cache');
+  location.reload();
+}
+
+function deleteRow(idx){
+  if(!confirm(`确认删除 ${data[idx].game||'(空)'} ？`)) return;
+  data.splice(idx,1);
+  const j = {records: data.map(r=>({uploader:r.uploader,game:r.game,pkg:r.pkg,backend:r.backend,status:r.status,expense:r.expense,revenue:r.revenue,max_revenue:r.max_revenue})), dates: window._excelDates || getDates()};
+  localStorage.setItem('games_3tabs_cache', JSON.stringify(j));
+  render();
+}
+
+loadData();
+
+// === 自动静默刷新：每 30 秒拉一次 Excel ===
+// 用版本号对比，避免无意义重渲染；数据变了才刷新
+setInterval(async () => {
+  try {
+    const r = await fetch(DATA_3TABS_FILE + '?_=' + Date.now(), {
+      cache: 'no-store'
+    });
+    if(!r.ok) return;
+    const j = await r.json();
+    const newVer = j.meta && j.meta.updated_at || '';
+    const oldVer = localStorage.getItem('games_3tabs_ver');
+    if(newVer && newVer !== oldVer){
+      console.log('[Hermes] 检测到 Excel 更新，自动刷新', newVer);
+      localStorage.setItem('games_3tabs_ver', newVer);
+      try { localStorage.setItem('games_3tabs_cache', JSON.stringify(j)); } catch(e){}
+      excelRecords = j.records || [];
+      window._excelDates = j.dates || getDates();
+      data = excelRecords.map(rec => ({
+        uploader: rec.uploader, game: rec.game, pkg: rec.pkg,
+        backend: rec.backend, status: rec.status,
+        expense: rec.expense || [], revenue: rec.revenue || [],
+        max_revenue: rec.max_revenue || [],
+      }));
+      const vd = document.getElementById('verDisplay');
+      if(vd) vd.textContent = 'v' + DATA_VER + ' (Excel · ' + newVer.substring(11,16) + ' · 自动更新)';
+      render();
+    }
+  } catch(e) {}
+}, 30 * 1000);
+
+// === 检测到 bfcache 恢复（用户按浏览器后退键），强制刷新 ===
+window.addEventListener('pageshow', e => {
+  if(e.persisted){
+    console.log('[Hermes] 从 bfcache 恢复，强制刷新数据');
+    loadData();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 群聊 - 多模型讨论</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+body{background:#f5f0f5;min-height:100vh;padding:20px;}
+.container{max-width:1200px;margin:0 auto;}
+h1{text-align:center;color:#6a5acd;margin-bottom:6px;font-size:24px;}
+.sub{text-align:center;color:#999;font-size:13px;margin-bottom:20px;}
+
+/* Config bar */
+.config{background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 2px 12px rgba(0,0,0,0.04);margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.config .field{flex:1;min-width:200px;}
+.config .field label{display:block;font-size:11px;color:#888;margin-bottom:3px;}
+.config .field input{width:100%;padding:8px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;outline:none;}
+.config .field input:focus{border-color:#6a5acd;}
+.config .btn{padding:8px 20px;background:#6a5acd;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;}
+.config .btn:hover{background:#5a4abd;}
+.config .status{font-size:12px;color:#999;display:flex;align-items:center;gap:6px;padding:8px 0;}
+
+/* Question input */
+.question-bar{display:flex;gap:10px;margin-bottom:16px;}
+.question-bar input{flex:1;padding:12px 16px;border:1px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;}
+.question-bar input:focus{border-color:#6a5acd;}
+.question-bar button{padding:12px 28px;background:#6a5acd;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;}
+.question-bar button:hover{background:#5a4abd;}
+.question-bar button:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* Model columns */
+.columns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+.col{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);overflow:hidden;display:flex;flex-direction:column;}
+.col-header{padding:12px 16px;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;}
+.col-body{padding:14px 16px;min-height:200px;font-size:13px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;flex:1;}
+.col-body.loading{color:#999;display:flex;align-items:center;justify-content:center;gap:8px;}
+.col-body.loading::after{content:'';width:16px;height:16px;border:2px solid #e0e0e0;border-top-color:#6a5acd;border-radius:50%;animation:spin .6s linear infinite;}
+.col-body .model-name{font-size:11px;color:#999;margin-bottom:8px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.col-body .error{color:#e74c3c;}
+
+/* Synthesis */
+.synthesis{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);overflow:hidden;}
+.syn-header{padding:12px 20px;background:#f8f0ff;color:#6a5acd;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;}
+.syn-body{padding:16px 20px;font-size:13px;line-height:1.7;color:#333;white-space:pre-wrap;min-height:80px;}
+.syn-body.loading{color:#999;display:flex;align-items:center;justify-content:center;gap:8px;}
+.syn-body.loading::after{content:'';width:16px;height:16px;border:2px solid #e0e0e0;border-top-color:#6a5acd;border-radius:50%;animation:spin .6s linear infinite;}
+
+/* Model config modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;justify-content:center;align-items:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:24px;width:500px;max-width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
+.modal h3{font-size:16px;margin-bottom:16px;color:#333;}
+.modal .field{margin-bottom:12px;}
+.modal .field label{display:block;font-size:12px;color:#666;margin-bottom:4px;}
+.modal .field input{width:100%;padding:8px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.modal .btn{padding:8px 20px;border:none;border-radius:8px;font-size:13px;cursor:pointer;}
+.modal .btn-primary{background:#6a5acd;color:#fff;}
+.modal .btn-outline{background:transparent;border:1px solid #e0e0e0;color:#666;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🤖 AI 群聊</h1>
+  <div class="sub">一个问题 → 三个模型分别回答 → AI 综合建议</div>
+
+  <!-- Config -->
+  <div class="config">
+    <div class="field">
+      <label>API 地址</label>
+      <input id="apiUrl" placeholder="如 https://api.example.com/v1" value="">
+    </div>
+    <div class="field">
+      <label>API Key</label>
+      <input id="apiKey" type="password" placeholder="sk-..." value="">
+    </div>
+    <button class="btn" onclick="openModelConfig()">⚙️ 配置模型</button>
+    <span class="status" id="status">🟡 未配置</span>
+  </div>
+
+  <!-- Question -->
+  <div class="question-bar">
+    <input id="questionInput" placeholder="输入你的问题，三个模型将同时回答..." onkeydown="if(event.key==='Enter')send()">
+    <button id="sendBtn" onclick="send()">🚀 发送</button>
+  </div>
+
+  <!-- 3 columns -->
+  <div class="columns" id="columns"></div>
+
+  <!-- Synthesis -->
+  <div class="synthesis" id="synthesis">
+    <div class="syn-header">🤖 AI 综合建议</div>
+    <div class="syn-body" id="synBody">等待三个模型回答完毕后，自动生成综合建议...</div>
+  </div>
+</div>
+
+<!-- Model config modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>⚙️ 配置模型名称</h3>
+    <div class="field"><label>千问 模型名</label><input id="mQwen" value="qwen-plus" placeholder="如 qwen-plus, qwen-max"></div>
+    <div class="field"><label>DeepSeek 模型名</label><input id="mDeepseek" value="deepseek-chat" placeholder="如 deepseek-chat, deepseek-v3"></div>
+    <div class="field"><label>智谱 模型名</label><input id="mZhipu" value="glm-4-flash" placeholder="如 glm-4-plus, glm-4-flash, chatglm-turbo"></div>
+    <div class="btns">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveModelConfig()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MODELS = [
+  {id:'qwen',     name:'千问',    icon:'Q', color:'#0066ff', modelKey:'mQwen'},
+  {id:'deepseek', name:'Deepseek',icon:'D', color:'#4f46e5', modelKey:'mDeepseek'},
+  {id:'zhipu',    name:'智谱',    icon:'Z', color:'#2563eb', modelKey:'mZhipu'},
+];
+
+const MODEL_KEY = 'ai_group_model_names';
+const API_KEY = 'ai_group_api';
+
+function getSettings(){
+  return {
+    apiUrl: document.getElementById('apiUrl').value.trim(),
+    apiKey: document.getElementById('apiKey').value.trim(),
+    models: MODELS.map(m => ({
+      id: m.id,
+      name: m.name,
+      icon: m.icon,
+      color: m.color,
+      modelName: localStorage.getItem(m.modelKey) || (m.modelKey==='mQwen'?'qwen-plus':m.modelKey==='mDeepseek'?'deepseek-chat':'glm-4-flash')
+    }))
+  };
+}
+
+function renderColumns(){
+  const cols = document.getElementById('columns');
+  const settings = getSettings();
+  cols.innerHTML = settings.models.map(m => `
+    <div class="col">
+      <div class="col-header" style="background:${m.color};">${m.icon} ${m.name}</div>
+      <div class="col-body" id="col-${m.id}">
+        <div class="model-name">模型: ${m.modelName}</div>
+        等待输入问题...
+      </div>
+    </div>
+  `).join('');
+}
+
+async function callModel(apiUrl, apiKey, modelName, question){
+  const resp = await fetch('/api/proxy', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      apiUrl, apiKey, model: modelName,
+      messages: [{role:'user', content: question}],
+      temperature: 0.7,
+      max_tokens: 2000
+    })
+  });
+  if(!resp.ok){
+    const err = await resp.text();
+    throw new Error(`请求失败: ${err}`);
+  }
+  const data = await resp.json();
+  if(data.error) throw new Error(data.error);
+  return data.choices[0].message.content;
+}
+
+async function send(){
+  const question = document.getElementById('questionInput').value.trim();
+  if(!question) return;
+  const settings = getSettings();
+  if(!settings.apiUrl || !settings.apiKey){
+    document.getElementById('status').innerHTML = '🔴 请填写 API 地址和 Key';
+    return;
+  }
+
+  document.getElementById('status').innerHTML = '🟢 已配置';
+  document.getElementById('sendBtn').disabled = true;
+
+  // Show loading
+  settings.models.forEach(m => {
+    document.getElementById(`col-${m.id}`).innerHTML = `<div class="loading">${m.name} 思考中</div>`;
+  });
+  document.getElementById('synBody').innerHTML = '<div class="loading">等待回答中</div>';
+
+  // Call all models in parallel
+  const results = await Promise.allSettled(
+    settings.models.map(m => 
+      callModel(settings.apiUrl, settings.apiKey, m.modelName, question)
+        .then(text => ({id: m.id, text}))
+        .catch(err => ({id: m.id, error: err.message}))
+    )
+  );
+
+  let answers = {};
+  results.forEach(r => {
+    if(r.status === 'fulfilled'){
+      const d = r.value;
+      if(d.error){
+        document.getElementById(`col-${d.id}`).innerHTML = `<div class="error">❌ ${d.error}</div>`;
+      } else {
+        document.getElementById(`col-${d.id}`).innerHTML = d.text;
+        answers[d.id] = d.text;
+      }
+    }
+  });
+
+  // Generate synthesis
+  const answerCount = Object.keys(answers).length;
+  if(answerCount >= 2){
+    document.getElementById('synBody').innerHTML = '<div class="loading">生成综合建议中</div>';
+    try {
+      const synPrompt = `我有以下问题：\n${question}\n\n以下是三个AI模型的回答：\n${
+        settings.models.map(m => 
+          `--- ${m.name} 的回答 ---\n${answers[m.id] || '（未获取到回答）'}`
+        ).join('\n\n')
+      }\n\n请综合以上三个模型的回答，给出一个全面的、整合的建议。`;
+      
+      const synText = await callModel(settings.apiUrl, settings.apiKey, settings.models[0].modelName, synPrompt);
+      document.getElementById('synBody').innerHTML = synText;
+    } catch(e){
+      document.getElementById('synBody').innerHTML = '❌ 综合建议生成失败: ' + e.message;
+    }
+  } else {
+    document.getElementById('synBody').innerHTML = '回答数量不足，无法生成综合建议。';
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// Model config
+function openModelConfig(){
+  MODELS.forEach(m => {
+    document.getElementById(m.modelKey).value = localStorage.getItem(m.modelKey) || '';
+  });
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function saveModelConfig(){
+  MODELS.forEach(m => {
+    const val = document.getElementById(m.modelKey).value.trim();
+    if(val) localStorage.setItem(m.modelKey, val);
+  });
+  closeModal();
+  renderColumns();
+}
+
+// Init
+renderColumns();
+</script>
+</body>
+</html>

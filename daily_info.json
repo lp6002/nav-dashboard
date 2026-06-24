@@ -1,0 +1,275 @@
+{
+  "meta": {
+    "updated_at": "2026-06-23T10:01:18.173775+08:00",
+    "finance_updated_at": "2026-06-23T10:01:18.173775+08:00",
+    "version": 1
+  },
+  "stocks_a": [
+    {
+      "name": "上证指数",
+      "price": 4166.5939,
+      "pct": 0.08,
+      "change": 3.4974
+    },
+    {
+      "name": "深证成指",
+      "price": 16150.918,
+      "pct": -1.35,
+      "change": -221.581
+    },
+    {
+      "name": "创业板指",
+      "price": 4284.961,
+      "pct": -1.71,
+      "change": -74.431
+    },
+    {
+      "name": "沪深300",
+      "price": 5015.612,
+      "pct": -0.87,
+      "change": -44.046
+    },
+    {
+      "name": "中证 500",
+      "price": 8804.027,
+      "pct": -0.73,
+      "change": -64.755
+    }
+  ],
+  "stocks_hk": [
+    {
+      "name": "恒生指数",
+      "price": 23808.84,
+      "pct": 0.108,
+      "change": 25.67
+    },
+    {
+      "name": "恒生中国企业指数",
+      "price": 7931.18,
+      "pct": 0.147,
+      "change": 11.669
+    },
+    {
+      "name": "恒生科技指数",
+      "price": 4559.59,
+      "pct": 0.093,
+      "change": 4.25
+    }
+  ],
+  "stocks_us": [
+    {
+      "name": "标普500指数",
+      "price": 7472.79,
+      "pct": -0.37,
+      "change": -27.649323
+    },
+    {
+      "name": "纳斯达克",
+      "price": 26166.6018,
+      "pct": -1.32,
+      "change": -345.39914376
+    },
+    {
+      "name": "道琼斯",
+      "price": 51712.7109,
+      "pct": 0.29,
+      "change": 149.96686160999997
+    }
+  ],
+  "metals": {
+    "gold": {
+      "name": "国际金价 (伦敦金 XAU/USD)",
+      "price": 4159.46,
+      "pct": -0.76,
+      "change": -31.72,
+      "unit": "USD/盎司",
+      "time": "10:01:00"
+    },
+    "silver": {
+      "name": "国际银价 (纽约白银 SI/USD)",
+      "price": 64.459,
+      "pct": 0,
+      "change": 64.459,
+      "unit": "USD/盎司"
+    }
+  },
+  "hardware": {
+    "ssd": [
+      {
+        "name": "三星 990 PRO 2TB",
+        "price": 1299,
+        "note": "京东参考(zol)",
+        "change": null
+      },
+      {
+        "name": "三星 9100 PRO 2TB",
+        "price": 1499,
+        "note": "京东首发促销",
+        "change": null
+      },
+      {
+        "name": "西部数据 SN850X 2TB",
+        "price": 1129,
+        "note": "京东促销参考(zol)",
+        "change": null
+      },
+      {
+        "name": "铠侠 RC20 1TB",
+        "price": 379,
+        "note": "京东参考",
+        "change": null
+      }
+    ],
+    "ram": [
+      {
+        "name": "金士顿 Fury DDR5 32G 6000",
+        "price": 665,
+        "note": "京东活动(zol)",
+        "change": null
+      },
+      {
+        "name": "芝奇皇家戟 DDR5 32G 6400",
+        "price": 1099,
+        "note": "京东参考",
+        "change": null
+      },
+      {
+        "name": "金士顿 Fury DDR5 64G 6000",
+        "price": 1899,
+        "note": "京东自营活动(zol)",
+        "change": null
+      },
+      {
+        "name": "英睿达 Pro DDR5 64G 5600",
+        "price": 1696,
+        "note": "京东参考",
+        "change": null
+      }
+    ],
+    "gpu": [
+      {
+        "name": "英伟达 RTX 5090 D 32G",
+        "price": 25999,
+        "note": "京东首发参考(IT之家)",
+        "change": null
+      },
+      {
+        "name": "英伟达 RTX 5080 16G",
+        "price": 9749,
+        "note": "京东促销参考(zol)",
+        "change": null
+      },
+      {
+        "name": "英伟达 RTX 4090 D 24G",
+        "price": 17499,
+        "note": "京东自营秒杀(ITCN)",
+        "change": null
+      },
+      {
+        "name": "英伟达 RTX 5070 Ti 16G",
+        "price": 6964,
+        "note": "京东促销参考(zol)",
+        "change": null
+      }
+    ]
+  },
+  "news_ai": [
+    {
+      "title": "2026 LLM 变天：这 6 款中国开源模型正全面霸榜",
+      "url": "https://www.threads.com/@yololab.life/post/DTmw-TNjnFz",
+      "source": "threads.com",
+      "date": "06-22"
+    },
+    {
+      "title": "全球AI模型发布时间线(持续更新)",
+      "url": "https://zhuanlan.zhihu.com/p/14903006525",
+      "source": "zhuanlan.zhihu.com",
+      "date": "06-22"
+    },
+    {
+      "title": "DeepSeek V4 发布：2026 年开源大模型以 1/30 成本挑战 GPT-5.5",
+      "url": "https://my.oschina.net/u/9753217/blog/19682693",
+      "source": "oschina.net",
+      "date": "06-22"
+    },
+    {
+      "title": "GLM-5.2 / Kimi K2.6 / Qwen3 / MiniMax 2026 开源编程模型横评",
+      "url": "https://www.atlascloud.ai/zh/blog/guides/coding-plan-best-open-source-coding-llm",
+      "source": "atlascloud.ai",
+      "date": "06-22"
+    },
+    {
+      "title": "国产大模型四强对决：Kimi K2.6 vs GLM-5.1 vs Qwen3.6-Plus",
+      "url": "https://deepseek.csdn.net/6a320916662f9a54cb803dfe.html",
+      "source": "csdn.net",
+      "date": "06-22"
+    }
+  ],
+  "news_comfy": [
+    {
+      "title": "ComfyUI Changelog (官方)",
+      "url": "https://docs.comfy.org/changelog",
+      "source": "docs.comfy.org",
+      "date": "06-22"
+    },
+    {
+      "title": "ComfyUI v0.25.0 发布说明 (Reddit)",
+      "url": "https://www.reddit.com/r/comfyui/comments/1u879sb/release_v0250_comfyorgcomfyui/",
+      "source": "reddit.com",
+      "date": "06-22"
+    },
+    {
+      "title": "SCAIL-2 / Bernini-R 模型在 ComfyUI 中的应用",
+      "url": "https://github.com/zai-org/SCAIL-2",
+      "source": "github.com",
+      "date": "06-22"
+    },
+    {
+      "title": "Comfy Desktop 新版本说明 (2026-06-12 更新)",
+      "url": "https://note.com/hirorohi03/n/n42c818ff26e1",
+      "source": "note.com",
+      "date": "06-22"
+    },
+    {
+      "title": "Comfy-Org/ComfyUI 官方 Releases (GitHub)",
+      "url": "https://github.com/Comfy-Org/ComfyUI/releases",
+      "source": "github.com",
+      "date": "06-22"
+    }
+  ],
+  "news_robot": [
+    {
+      "title": "工信部、国资委启动2026年度人形机器人与具身智能实景实训专项行动",
+      "url": "https://news.qq.com/rain/a/20260609A026VL00",
+      "source": "qq.com",
+      "date": "06-22"
+    },
+    {
+      "title": "央视报道：2026年度人形机器人与具身智能实景实训专项行动启动",
+      "url": "https://tv.cctv.com/2026/06/10/VIDEJQM7vLqXUbLbEvrzBtLV260610.shtml",
+      "source": "cctv.com",
+      "date": "06-22"
+    },
+    {
+      "title": "宇树、智元竞逐出货量第一：2026 人形机器人规模化应用大考",
+      "url": "https://www.cls.cn/detail/2268349",
+      "source": "cls.cn",
+      "date": "06-22"
+    },
+    {
+      "title": "TrendForce：宇树、智元合计将占 2026 中国人形机器人八成出货",
+      "url": "https://makerpro.cc/2026/04/estimation-of-china-humanoid-robot-production-in-2026/",
+      "source": "makerpro.cc",
+      "date": "06-22"
+    },
+    {
+      "title": "CES 2026：智元、星动纪元、宇树、云深处、傅利叶 GR-3",
+      "url": "https://zhuanlan.zhihu.com/p/1993814792125835125",
+      "source": "zhuanlan.zhihu.com",
+      "date": "06-22"
+    }
+  ],
+  "summary_ai": "<h4>🤖 闭源旗舰</h4>\n<ul>\n  <li><strong>GPT-5.5 / GPT-5.5 Pro</strong>：OpenAI 已于 4 月 24 日正式发布并全面开放，主打 agentic 能力跃升，与 Claude Opus 4.7、Gemini 3.1 Pro 形成三足鼎立。</li>\n  <li><strong>Claude Opus 4.7</strong>：Anthropic 最新版本，主打复杂软件工程和长链路 agent 任务，相比 4.6 在 code 与多步推理上有明显提升。</li>\n  <li><strong>Gemini 3.1 Pro</strong>：Google 旗舰预览版更新，长上下文与多模态能力进一步打磨，价格策略仍走性价比路线。</li>\n</ul>\n<h4>🌟 开源新势力</h4>\n<ul>\n  <li><strong>DeepSeek V4 系列</strong>：4 月发布 V4 Pro / V4 Flash，V4 Pro 支持 1M 上下文、最大输出 384K tokens，以 1/30 训练成本挑战 GPT-5.5 级别闭源模型。</li>\n  <li><strong>Kimi K2.6 / GLM-5.2 / Qwen3.6-Plus / MiniMax M2</strong>：4 月前后密集发布，Artificial Analysis 榜单中 Kimi K2.6 暂列开放权重模型第一，Intelligence Index 达 54。</li>\n  <li><strong>GLM-5.2</strong>：智谱于 6 月 16 日在 SiliconFlow 上线最新旗舰，主打 Vibe Coding 全能，已开放 API。</li>\n</ul>\n<h4>💡 趋势观察</h4>\n<p>2026 上半年国产开源大模型在 SWE-bench、Intelligence Index 等硬指标上已对 Claude 4 级别闭源模型形成正面对标；中国厂商在 agentic 与长上下文双线发力，DeepSeek V4 的\"低成本 + 超长上下文\"路线正成为新标杆。</p>",
+  "summary_comfy": "<h4>🎨 核心更新</h4>\n<ul>\n  <li><strong>v0.25.1 (2026-06-16)</strong>：合作伙伴节点更新，Kling V3-Turbo 模型支持正式加入 (#14528)。</li>\n  <li><strong>v0.25.0 (2026-06-16)</strong>：新增 10-bit 视频支持，集成 SCAIL-2（角色替换视频编辑）与 Bernini-R（Wan 系列）模型，Bria / Krea 等新合作伙伴 API 节点上架。</li>\n  <li>Google 模型支持同步更新，OpenAI API 节点修复若干兼容性问题，Comfy Desktop 概念图也在 6 月 12 日完成重构。</li>\n</ul>\n<h4>📦 新模型/插件</h4>\n<ul>\n  <li><strong>SCAIL-2</strong>：端到端 in-context 角色动画模型，告别 ControlNet 依赖，工作流更轻量。</li>\n  <li><strong>Bernini-R</strong>：基于 Wan 的视频编辑与主体替换模型，适合长视频一致性处理。</li>\n  <li><strong>LTX-2.3 / Licon-MSR / Kling V3-Turbo</strong>：社区高频讨论的新模型组合，可显著拓展视频生成工作流。</li>\n</ul>",
+  "summary_robot": "<h4>🦾 产业动态</h4>\n<ul>\n  <li><strong>工信部+国资委专项行动</strong>：6 月 8 日联合印发 2026 年度人形机器人与具身智能实景实训通知（工信厅联科函〔2026〕256 号），聚焦工业、服务、特种场景，目标打造百个高价值应用。</li>\n  <li><strong>2025 全球出货 1.8 万台</strong>：销售额约 4.4 亿美元，同比增长约 508%，中国厂商占主导地位。</li>\n  <li><strong>2026 预计同比 +94%</strong>：TrendForce 预估中国人形机器人产量大幅增长，宇树、智元合计份额近 80%。</li>\n</ul>\n<h4>🌍 中国厂商</h4>\n<ul>\n  <li><strong>宇树科技</strong>：2025 全年人形机器人实际出货超 5500 台，本体量产下线超 6500 台，王兴兴带领 G1/H2 亮相展示全自主集体控制技术。</li>\n  <li><strong>智元机器人</strong>：出货约 5200 台，新增人形机器人生产订单超万台，量产进度领先；首席科学家罗剑岚强调规模化将反哺机器人\"进化\"。</li>\n  <li><strong>傅利叶</strong>：CES 2026 首次登陆，全尺寸人形机器人 GR-3 凭亲和工业设计与多模态交互成为焦点；优必选 2026 产能规划达 10000 台。</li>\n</ul>"
+}
