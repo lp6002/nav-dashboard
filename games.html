@@ -311,14 +311,20 @@ const DATA_VER = 15; // 升级：加 4 个 tab
   }
 
   async function loadData(){
-    // 1. 优先 fetch 来自 Excel 的 3 表 JSON（强制不缓存，避免浏览器 HTTP 缓存）
-    try{
-      const r = { ok: true, json: async () => EMBEDDED_3TABS_DATA }; // embedded
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-      });
-      if(r.ok){
-        const j = await r.json();
+      // 1. 优先用内嵌的 EMBEDDED_3TABS_DATA（最新 Excel 数据）
+      // 2. 兜底 fetch 来自外部 JSON（如果内嵌不存在）
+      try{
+        let j;
+        if(typeof EMBEDDED_3TABS_DATA !== 'undefined' && EMBEDDED_3TABS_DATA && EMBEDDED_3TABS_DATA.records){
+          j = EMBEDDED_3TABS_DATA;
+        } else {
+          const r = await fetch(DATA_3TABS_FILE + '?_=' + Date.now(), {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+          });
+          if(!r.ok) throw new Error('fetch failed');
+          j = await r.json();
+        }
         // 用 updated_at 比较版本号，避免 localStorage 旧缓存覆盖新数据
         const newVer = j.meta && j.meta.updated_at || '';
         const cachedVer = localStorage.getItem('games_3tabs_ver');
@@ -341,10 +347,7 @@ const DATA_VER = 15; // 升级：加 4 个 tab
         // 缓存到 localStorage（永远用最新覆盖）
         try { localStorage.setItem('games_3tabs_cache', JSON.stringify(j)); } catch(e){}
         document.getElementById('verDisplay').textContent = 'v' + DATA_VER + ' (Excel · ' + (newVer ? newVer.substring(11,16) : '') + ')';
-      } else {
-        throw new Error('fetch failed');
-      }
-    }catch(e){
+            }catch(e){
       // 回退到缓存或默认
       const cached = localStorage.getItem('games_3tabs_cache');
       if(cached){
