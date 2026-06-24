@@ -719,11 +719,17 @@ loadData();
 // 用版本号对比，避免无意义重渲染；数据变了才刷新
 setInterval(async () => {
   try {
-    const r = { ok: true, json: async () => EMBEDDED_3TABS_DATA }; // embedded
-      cache: 'no-store'
-    });
-    if(!r.ok) return;
-    const j = await r.json();
+    let j;
+    if(typeof EMBEDDED_3TABS_DATA !== 'undefined' && EMBEDDED_3TABS_DATA && EMBEDDED_3TABS_DATA.records){
+      j = EMBEDDED_3TABS_DATA;
+    } else {
+      const r = await fetch(DATA_3TABS_FILE + '?_=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
+      if(!r.ok) return;
+      j = await r.json();
+    }
     const newVer = j.meta && j.meta.updated_at || '';
     const oldVer = localStorage.getItem('games_3tabs_ver');
     if(newVer && newVer !== oldVer){
