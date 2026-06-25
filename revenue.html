@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>收入数据管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+body{display:flex;min-height:100vh;background:#f5f0f5;}
+.sidebar{width:220px;background:#fff;border-right:1px solid #eee;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-logo{padding:18px 16px;font-size:18px;font-weight:800;color:#6a5acd;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;}
+.sidebar-logo .icon{width:28px;height:28px;background:linear-gradient(135deg,#6a5acd,#9b59b6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-item{display:flex;align-items:center;padding:10px 16px;cursor:pointer;color:#444;font-size:13px;transition:all .1s;border-left:3px solid transparent;text-decoration:none;}
+.nav-item:hover{background:#f8f0ff;color:#6a5acd;}
+.nav-item.active{background:#f0e6ff;color:#6a5acd;border-left-color:#6a5acd;font-weight:600;}
+.nav-item .ico{width:20px;text-align:center;margin-right:10px;font-size:15px;}
+.nav-item .arrow{margin-left:auto;font-size:10px;color:#bbb;}
+.nav-divider{height:1px;background:#f0f0f0;margin:6px 16px;}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:#f5f0f5;}
+.top-header{display:flex;align-items:center;padding:12px 24px;background:#1a1a2e;gap:20px;}
+.top-header a{color:rgba(255,255,255,0.75);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.top-header a:hover{color:#fff;}
+.top-header .brand{font-weight:700;color:#fff;}
+.top-header .brand .tag{font-size:10px;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:999px;color:rgba(255,255,255,0.6);margin-left:4px;}
+.top-header .right{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);}
+.content{padding:20px 24px;flex:1;overflow:auto;}
+.page-title{font-size:20px;font-weight:700;color:#333;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.page-sub{font-size:13px;color:#999;margin-bottom:16px;}
+.summary-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.sum-card{flex:1;min-width:200px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.sum-card .label{font-size:12px;color:#999;}
+.sum-card .value{font-size:24px;font-weight:700;color:#6a5acd;margin-top:6px;}
+.sum-card .value .unit{font-size:13px;color:#999;font-weight:400;margin-left:4px;}
+.table-wrap{overflow-x:auto;border-radius:14px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.04);margin-bottom:16px;}
+table{font-size:12px;border-collapse:collapse;width:100%;}
+th{padding:10px 12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap;font-weight:600;color:#555;background:#f8f6fc;position:sticky;top:0;z-index:5;}
+th.right{text-align:right;}
+td{padding:9px 12px;border-bottom:1px solid #f3f3f3;color:#333;white-space:nowrap;}
+td.right{text-align:right;}
+tbody tr:hover{background:#faf8ff;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.zero td{color:#bbb;}
+tfoot td{background:#f8f6fc;padding:10px 12px;border-top:2px solid #e0d8f0;font-weight:600;}
+tfoot td.right{text-align:right;}
+.rev-empty{text-align:center;color:#999;padding:30px 0;}
+.rev-name{font-weight:600;color:#6a5acd;}
+.rev-pkg{font-family:ui-monospace,Consolas,monospace;color:#888;font-size:11px;}
+.rev-up{color:#16a34a;}
+.rev-down{color:#dc2626;}
+.rev-na{color:#bbb;}
+.up-tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-right:6px;vertical-align:middle;}
+#revRefreshBtn.loading #revRefreshIcon{display:inline-block;animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.meta-bar{display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:12px;color:#999;}
+.meta-bar .dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@media(max-width:900px){
+  .sidebar{width:56px;}
+  .sidebar-logo span:not(.icon){display:none;}
+  .nav-item .ico{margin-right:0;}
+  .nav-item span:not(.ico),.nav-item .arrow{display:none;}
+  .summary-row{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="icon">W</div><span>我的工作台</span></div>
+  <div class="sidebar-nav">
+    <a class="nav-item" href="index.html"><span class="ico">🏠</span><span>主页</span></a>
+    <a class="nav-item active" href="revenue.html"><span class="ico">📊</span><span>收入数据管理</span><span class="arrow">›</span></a>
+    <a class="nav-item" href="games.html"><span class="ico">🎯</span><span>游戏投放管理</span></a>
+    <a class="nav-item" href="info_dashboard.html"><span class="ico">📰</span><span>每日资讯看板</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">📋</span><span>日报分析</span></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🎮</span><span>游戏管理</span><span class="arrow">›</span></div>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="video.html"><span class="ico">🎬</span><span>视频</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">💰</span><span>收益统计</span></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🔧</span><span>常用工具</span><span class="arrow">›</span></div>
+    <a class="nav-item" href="ai.html"><span class="ico">🤖</span><span>AI助手</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">⚙️</span><span>配置</span></div>
+  </div>
+</div>
+<div class="main">
+  <div class="top-header">
+    <a href="index.html" class="brand">🎯 工作台<span class="tag">Beta</span></a>
+    <a href="revenue.html">📊 收入数据管理</a>
+    <a href="games.html">🎮 游戏投放管理</a>
+    <a href="info_dashboard.html">📰 每日资讯看板</a>
+    <span class="right">IAA 后台 · 每 5 分钟自动刷新</span>
+  </div>
+  <div class="content">
+    <div class="page-title">
+      <span>💰 收入数据管理</span>
+      <button class="btn" id="revRefreshBtn" style="margin-left:auto;padding:8px 18px;background:#fff;color:#6a5acd;border:1px solid #6a5acd;border-radius:8px;font-size:13px;cursor:pointer;">
+        <span id="revRefreshIcon">↻</span> 刷新数据
+      </button>
+    </div>
+    <div class="page-sub">IAA 后台（47.237.119.194:8800）· 自投应用今日广告收益</div>
+    <div class="summary-row">
+      <div class="sum-card">
+        <div class="label">现在收益合计</div>
+        <div class="value" id="sumNow">—<span class="unit">USD</span></div>
+      </div>
+      <div class="sum-card">
+        <div class="label">今日预计收益</div>
+        <div class="value" id="sumPred">—<span class="unit">USD</span></div>
+      </div>
+      <div class="sum-card">
+        <div class="label">应用数</div>
+        <div class="value" id="sumApps">—<span class="unit">个</span></div>
+      </div>
+      <div class="sum-card">
+        <div class="label">抓取时间</div>
+        <div class="value" id="sumTime" style="font-size:18px;">—</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="filterInput" placeholder="搜索应用名或包名...">
+      <select id="filterPub">
+        <option value="">全部渠道</option>
+        <option value="自投">自投</option>
+        <option value="发行">发行</option>
+        <option value="夏总">夏总</option>
+        <option value="easou">easou</option>
+      </select>
+      <select id="filterSort">
+        <option value="revenue_desc">按收益降序</option>
+        <option value="revenue_asc">按收益升序</option>
+        <option value="name">按名称</option>
+        <option value="change">按环比</option>
+      </select>
+    </div>
+    <div class="meta-bar">
+      <span class="dot"></span>
+      <span id="revMeta">加载中…</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>应用</th>
+            <th>包名</th>
+            <th>渠道</th>
+            <th class="right">现在收益 (USD)</th>
+            <th class="right">今日预计收益 (USD)</th>
+            <th class="right">环比</th>
+            <th class="right">今日新增</th>
+            <th class="right">今日活跃</th>
+            <th class="right">广告条数</th>
+          </tr>
+        </thead>
+        <tbody id="revTbody">
+          <tr><td colspan="10" class="rev-empty">正在加载…</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="text-align:right;color:#888;">合计</td>
+            <td class="right" id="ftNow" style="color:#6a5acd;">—</td>
+            <td class="right" id="ftPred" style="color:#6a5acd;">—</td>
+            <td colspan="4" id="ftFormula" style="font-size:10px;color:#aaa;text-align:right;">预计 = 现在收益 ÷ 已过小时数 × 24</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let allRows = [];
+const COLORS = {
+  Klein:  {bg:'#dbeafe',fg:'#1e40af'},
+  LQLgg:  {bg:'#fce7f3',fg:'#9d174d'},
+  JLL:    {bg:'#fef3c7',fg:'#92400e'},
+  '夏总': {bg:'#fce4ec',fg:'#c2185b'},
+  eason:  {bg:'#e0f2f1',fg:'#00796b'},
+  '发行': {bg:'#fff3e0',fg:'#f57c00'},
+};
+function colorFor(name){
+  if(COLORS[name]) return COLORS[name];
+  let h=0; for(let i=0;i<name.length;i++) h = name.charCodeAt(i) + ((h<<5)-h);
+  const bg = 'hsl(' + Math.abs(h)%360 + ',85%,92%)';
+  const fg = 'hsl(' + Math.abs(h)%360 + ',60%,28%)';
+  return {bg,fg};
+}
+function fmtUsd(n){
+  if(n===null||n===undefined) return '—';
+  return '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtNum(n){
+  if(n===null||n===undefined) return '—';
+  return Number(n).toLocaleString('en-US');
+}
+function fmtPct(n){
+  if(n===null||n===undefined) return '<span class="rev-na">—</span>';
+  const v = Number(n);
+  if(!isFinite(v)) return '<span class="rev-na">—</span>';
+  const cls = v>=0 ? 'rev-up' : 'rev-down';
+  const arrow = v>=0 ? '↑' : '↓';
+  return `<span class="${cls}">${arrow} ${Math.abs(v).toFixed(1)}%</span>`;
+}
+function renderRows(rows){
+  const tbody = document.getElementById('revTbody');
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="10" class="rev-empty">无匹配数据</td></tr>'; return; }
+  let html = '';
+  rows.forEach((r,i) => {
+    const zeroCls = (r.revenue===0) ? 'zero' : '';
+    const err = r.error ? ' <span class="rev-down" style="font-size:10px;">⚠</span>' : '';
+    let upTag = '';
+    const upName = r.uploader_display || r.uploader || '';
+    if(upName){
+      const c = colorFor(upName);
+      upTag = `<span class="up-tag" style="background:${c.bg};color:${c.fg};">${upName}</span>`;
+    }
+    html += `<tr class="${zeroCls}">
+      <td>${i+1}</td>
+      <td class="rev-name">${upTag}${r.name}${err}</td>
+      <td class="rev-pkg">${r.pkg}</td>
+      <td>${r.publisher}</td>
+      <td class="right" style="font-weight:600;">${fmtUsd(r.revenue)}</td>
+      <td class="right" style="font-weight:600;color:#6a5acd;">${fmtUsd(r.predicted)}</td>
+      <td class="right">${fmtPct(r.change_rate)}</td>
+      <td class="right">${fmtNum(r.today_new_users)}</td>
+      <td class="right">${fmtNum(r.today_active_users)}</td>
+      <td class="right">${fmtNum(r.today_ad_count)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+  const totalNow = rows.reduce((s,r) => s + (Number(r.revenue)||0), 0);
+  const totalPred = rows.reduce((s,r) => s + (Number(r.predicted)||0), 0);
+  document.getElementById('ftNow').textContent = fmtUsd(totalNow);
+  document.getElementById('ftPred').textContent = fmtUsd(totalPred);
+}
+function renderData(data){
+  if(!data || !data.rows){
+    document.getElementById('revTbody').innerHTML = '<tr><td colspan="10" class="rev-empty">数据加载失败：'+(data&&data.error||'未知错误')+'</td></tr>';
+    return;
+  }
+  allRows = data.rows;
+  document.getElementById('sumTime').textContent = data.fetched_time;
+  document.getElementById('sumApps').innerHTML = allRows.length + '<span class="unit">个</span>';
+  document.getElementById('ftFormula').textContent = `公式：现在收益 ÷ ${data.hours_elapsed}h × 24`;
+  document.getElementById('revMeta').textContent = `抓取于 ${data.fetched_at}（已过 ${data.hours_elapsed}h）· ${allRows.length} 个应用`;
+  applyFilter();
+}
+function applyFilter(){
+  const q = document.getElementById('filterInput').value.toLowerCase().trim();
+  const pub = document.getElementById('filterPub').value;
+  const sort = document.getElementById('filterSort').value;
+  let rows = allRows.filter(r => {
+    if(pub && r.publisher !== pub) return false;
+    if(q && !(r.name.toLowerCase().includes(q) || r.pkg.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  rows.sort((a,b) => {
+    if(sort === 'revenue_desc') return (b.revenue||0) - (a.revenue||0);
+    if(sort === 'revenue_asc') return (a.revenue||0) - (b.revenue||0);
+    if(sort === 'name') return a.name.localeCompare(b.name, 'zh-CN');
+    if(sort === 'change') return (a.change_rate||-9999) - (b.change_rate||-9999);
+    return 0;
+  });
+  renderRows(rows);
+  const totalNow = rows.reduce((s,r) => s + (Number(r.revenue)||0), 0);
+  const totalPred = rows.reduce((s,r) => s + (Number(r.predicted)||0), 0);
+  document.getElementById('sumNow').innerHTML = fmtUsd(totalNow) + '<span class="unit">USD</span>';
+  document.getElementById('sumPred').innerHTML = fmtUsd(totalPred) + '<span class="unit">USD</span>';
+}
+async function loadRevenue(force=false){
+  const btn = document.getElementById('revRefreshBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  try {
+    const url = 'data/revenue.json' + (force ? ('?t=' + Date.now()) : '');
+    const resp = await fetch(url, {cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data = await resp.json();
+    renderData(data);
+  } catch(e){
+    document.getElementById('revTbody').innerHTML = '<tr><td colspan="10" class="rev-empty">数据加载失败：'+e.message+'</td></tr>';
+    document.getElementById('revMeta').textContent = '加载失败：'+e.message;
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+document.getElementById('revRefreshBtn').addEventListener('click', ()=>loadRevenue(true));
+document.getElementById('filterInput').addEventListener('input', applyFilter);
+document.getElementById('filterPub').addEventListener('change', applyFilter);
+document.getElementById('filterSort').addEventListener('change', applyFilter);
+loadRevenue(false);
+setInterval(()=>loadRevenue(true), 5*60*1000);
+</script>
+</body>
+</html>

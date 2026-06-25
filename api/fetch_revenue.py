@@ -20,7 +20,9 @@ from datetime import datetime, timezone, timedelta
 BASE = "http://47.237.119.194:8800"
 USER = "lipeng"
 PWD  = "peng123"
-OUT  = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "revenue.json")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+OUT  = os.path.join(DATA_DIR, "revenue.json")
+UPLOADERS_CFG = os.path.join(DATA_DIR, "uploaders.json")
 
 
 def _beijing_now():
@@ -29,6 +31,16 @@ def _beijing_now():
     now = datetime.now(tz)
     hours = now.hour + now.minute / 60.0
     return now.strftime("%Y-%m-%d"), now.strftime("%H:%M"), hours
+
+
+def load_uploader_cfg():
+    """读取 data/uploaders.json（投手配置 + 包名归属）。失败时返回空配置。"""
+    try:
+        with open(UPLOADERS_CFG, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[fetch_revenue] 警告：读取 {UPLOADERS_CFG} 失败 ({e})，使用空配置")
+        return {"uploaders": [], "assignments": {}}
 
 
 def _login_and_stats(opener, package_names, max_total=20):
@@ -99,6 +111,7 @@ def fetch_package_list(opener):
 
 def main():
     print("[fetch_revenue] 开始抓取...")
+    uploader_cfg = load_uploader_cfg()
     try:
         opener = login()
         apps = fetch_package_list(opener)
@@ -125,6 +138,7 @@ def main():
                 "name": a["name"],
                 "pkg": a["pkg"],
                 "publisher": a["publisher"],
+                "uploader_id": (uploader_cfg["assignments"] or {}).get(a["pkg"], ""),
                 "revenue": None,
                 "predicted": None,
                 "error": d["error"],
@@ -136,6 +150,7 @@ def main():
             "name": a["name"],
             "pkg": a["pkg"],
             "publisher": a["publisher"],
+            "uploader_id": (uploader_cfg["assignments"] or {}).get(a["pkg"], ""),
             "revenue": round(rev, 2),
             "predicted": pred,
             "change_rate": d.get("todayAdRevenueChangeRate"),
@@ -150,6 +165,7 @@ def main():
         "fetched_time": time_str,
         "hours_elapsed": round(hours, 2),
         "formula": "predicted = revenue / hours_elapsed * 24",
+        "uploaders": uploader_cfg.get("uploaders", []),
         "rows": rows,
     }
 

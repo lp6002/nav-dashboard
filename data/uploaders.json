@@ -1,0 +1,41 @@
+{
+  "uploaders": [
+    {"id": "klein",   "name": "Klein",   "color": "#dbeafe", "textColor": "#1e40af"},
+    {"id": "lqlgg",   "name": "LQLgg",   "color": "#fce7f3", "textColor": "#9d174d"},
+    {"id": "jll",     "name": "JLL",     "color": "#fef3c7", "textColor": "#92400e"},
+    {"id": "xia",     "name": "夏总",    "color": "#fce4ec", "textColor": "#c2185b"},
+    {"id": "eason",   "name": "eason",   "color": "#e0f2f1", "textColor": "#00796b"},
+    {"id": "pub",     "name": "发行",    "color": "#fff3e0", "textColor": "#f57c00"}
+  ],
+  "assignments": {
+    "com.papaogamegirl.album":       "klein",
+    "com.ballgirlgames.sort":        "klein",
+    "com.shelfgament.shelf":         "klein",
+    "com.blockabeau.block":          "klein",
+    "com.beautywater.sortpuzzle.gp": "lqlgg",
+    "com.ballsourtalbum.ball":       "lqlgg",
+    "com.screwlikegg.sort":          "lqlgg",
+    "com.shelfblastapp.album":       "lqlgg",
+    "com.ssortsdream.screw":         "jll",
+    "com.dreamwaterss.sort":         "xia",
+    "com.screwgggame.game":          "xia",
+    "com.screwoood.screw":           "xia",
+    "com.paopaotwos.game":           "xia",
+    "com.screwpuzzle.pinout.gp":     "xia",
+    "com.eablocksand.line":          "xia",
+    "com.ballgamettsx.sort":         "xia",
+    "com.screwabgo.jam":             "xia",
+    "come.exquisitewaterss.sort":    "eason",
+    "com.puzzlebeautygirl.watersort":"eason",
+    "com.waterpuzzleas.sort":        "eason",
+    "com.iaagamescre.screw":         "eason",
+    "com.watergosort.water":         "eason",
+    "com.screwonlines.online":       "pub",
+    "com.fungamesapps.breakfast":    "pub",
+    "com.tskygame.fruitblock":       "pub",
+    "com.flowershelfiaa.game":       "pub",
+    "com.waterssappsx.game":         "pub",
+    "com.wcashscrewkz.screw":        "lqlgg",
+    "com.wshelfcashz.new":           "klein"
+  }
+}

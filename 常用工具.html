@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>常用工具</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+body{display:flex;min-height:100vh;background:#f5f0f5;}
+
+/* ====== SIDEBAR ====== */
+.sidebar{
+  width:220px;background:#fff;border-right:1px solid #eee;
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;
+}
+.sidebar-logo{
+  padding:18px 16px;font-size:18px;font-weight:800;color:#6a5acd;
+  display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;
+}
+.sidebar-logo .icon{
+  width:28px;height:28px;background:linear-gradient(135deg,#6a5acd,#9b59b6);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;
+}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-item{
+  display:flex;align-items:center;padding:10px 16px;cursor:pointer;color:#444;
+  font-size:13px;transition:all .1s;border-left:3px solid transparent;
+}
+.nav-item:hover{background:#f8f0ff;color:#6a5acd;}
+.nav-item.active{background:#f0e6ff;color:#6a5acd;border-left-color:#6a5acd;font-weight:600;}
+.nav-item .ico{width:20px;text-align:center;margin-right:10px;font-size:15px;}
+.nav-item .arrow{margin-left:auto;font-size:10px;color:#bbb;}
+.nav-divider{height:1px;background:#f0f0f0;margin:6px 16px;}
+
+/* ====== MAIN ====== */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:#f5f0f5;}
+
+/* Top Header */
+.top-header{
+  display:flex;align-items:center;padding:12px 24px;background:#1a1a2e;gap:20px;
+}
+.top-header a{
+  color:rgba(255,255,255,0.75);text-decoration:none;font-size:13px;
+  display:flex;align-items:center;gap:4px;transition:color .15s;
+}
+.top-header a:hover{color:#fff;}
+.top-header .brand{font-weight:700;color:#fff;margin-right:8px;gap:6px;}
+.top-header .brand .tag{
+  font-size:10px;background:rgba(255,255,255,0.15);padding:2px 8px;
+  border-radius:999px;color:rgba(255,255,255,0.6);margin-left:4px;
+}
+.top-header .right{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);}
+
+/* Content */
+.content{padding:24px 32px;flex:1;overflow:auto;}
+
+/* Page header */
+.page-header{margin-bottom:24px;}
+.page-title{
+  font-size:22px;font-weight:800;color:#333;
+  display:flex;align-items:center;gap:10px;margin-bottom:6px;
+}
+.page-sub{font-size:13px;color:#999;}
+
+/* Tool grid */
+.tool-grid{
+  display:grid;gap:14px;
+  grid-template-columns:1fr;
+}
+/* 平板 */
+@media(min-width:640px){
+  .tool-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(min-width:960px){
+  .tool-grid{grid-template-columns:repeat(3,1fr);}
+}
+/* 桌面 */
+@media(min-width:1200px){
+  .tool-grid{grid-template-columns:repeat(4,1fr);}
+}
+
+/* Tool card */
+.tool-card{
+  display:flex;align-items:center;gap:14px;
+  background:#fff;border-radius:14px;padding:16px;
+  text-decoration:none;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+  transition:transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s cubic-bezier(.4,0,.2,1);
+}
+.tool-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 28px rgba(0,0,0,.12);
+}
+.tool-card .tlogo{
+  width:48px;height:48px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:18px;
+}
+.tool-card .tinfo{flex:1;min-width:0;}
+.tool-card .tname{font-size:15px;font-weight:700;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tool-card .tdesc{font-size:12px;color:#999;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* 移动端改为上下布局 */
+@media(max-width:639px){
+  .tool-card{flex-direction:column;text-align:center;padding:18px 14px;}
+  .tool-card .tinfo{width:100%;}
+}
+
+/* Footer */
+.footer{text-align:center;font-size:12px;color:#ccc;padding:20px 0 10px;}
+
+/* Responsive sidebar */
+@media(max-width:900px){
+  .sidebar{width:56px;}
+  .sidebar-logo span:not(.icon){display:none;}
+  .nav-item .ico{margin-right:0;}
+  .nav-item span:not(.ico),.nav-item .arrow{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ====== SIDEBAR ====== -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">W</div>
+    <span>我的工作台</span>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-item" href="index.html"><span class="ico">🏠</span><span>主页</span></a>
+    <a class="nav-item" href="revenue.html"><span class="ico">📊</span><span>收入数据管理</span><span class="arrow">›</span></a>
+    <a class="nav-item" href="games.html"><span class="ico">🎯</span><span>游戏投放管理</span></a>
+    <a class="nav-item" href="info_dashboard.html"><span class="ico">📰</span><span>每日资讯看板</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">📋</span><span>日报分析</span></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🎮</span><span>游戏管理</span><span class="arrow">›</span></div>
+    <a class="nav-item" href="轮回修仙.html"><span class="ico">🐉</span><span>轮回修仙</span></a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="video.html"><span class="ico">🎬</span><span>视频</span></a>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">💰</span><span>收益统计</span></div>
+    <a class="nav-item active" href="常用工具.html"><span class="ico">🔧</span><span>常用工具</span></a>
+    <a class="nav-item" href="ai.html"><span class="ico">🤖</span><span>AI助手</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">⚙️</span><span>配置</span></div>
+  </div>
+</div>
+
+<!-- ====== MAIN ====== -->
+<div class="main">
+  <div class="top-header">
+    <a href="index.html" class="brand">🎯 工作台<span class="tag">Beta</span></a>
+    <a href="revenue.html">📊 收入数据管理</a>
+    <a href="games.html">🎮 游戏投放管理</a>
+    <a href="info_dashboard.html">📰 每日资讯看板</a>
+    <a href="常用工具.html">🔧 常用工具</a>
+    <span class="right">本地导航</span>
+  </div>
+
+  <div class="content">
+    <div class="page-header">
+      <div class="page-title">🔧 常用工具</div>
+      <div class="page-sub">快速跳转至常用站点，页面数据由 JS 数组配置，方便后续扩展。</div>
+    </div>
+
+    <div id="toolGrid" class="tool-grid"></div>
+
+    <div class="footer">我的工作台 · 本地导航 · 双击打开即可使用</div>
+  </div>
+</div>
+
+<script>
+/* ====== 工具数据配置（按需扩展） ====== */
+const tools = [
+  { name: 'AppsFlyer',   desc: '归因分析',     url: 'https://www.appsflyer.com',               color: '#2D333B', text: 'A' },
+  { name: 'Mintegral',   desc: 'MTG后台',      url: 'https://www.mintegral.com',               color: '#FF6B00', text: 'M' },
+  { name: 'Unity',       desc: 'Unity Ads',    url: 'https://dashboard.unity.com',             color: '#222C37', text: 'U' },
+  { name: 'GA4',         desc: '数据分析',     url: 'https://analytics.google.com',            color: '#FFC107', text: 'G', dark: true },
+  { name: 'HandBrake',   desc: '视频批量修改', url: 'https://handbrake.fr/',                  color: '#1A1A1A', text: 'H' },
+  { name: '魔戒VPN',     desc: '按流量收费',   url: 'https://mojie.app/register?aff=ZJa41QK6',color: '#3B5CFF', text: '魔' },
+  { name: 'Holopix AI',  desc: '游戏制图',     url: 'https://holopix.cn?inviteCode=696281',    color: '#7B2FFF', text: 'H' },
+  { name: '视频转序列帧', desc: 'frameronin.com', url: 'http://frameronin.com',                 color: '#FF3B30', text: '帧' },
+  { name: '试玩广告',     desc: 'Block Sand Relax', url: 'file:///C:/Users/lp263/工作空间/mtg/block_sand_relax/block_sand_relax.html', color: '#e91e63', text: '试' },
+  { name: '日报表',       desc: '维度分析',     url: 'file:///C:/Users/lp263/工作空间/日报.xlsx', color: '#0F9D58', text: '日' },
+  { name: 'Figma',       desc: 'UI设计',       url: 'https://www.figma.com',                   color: '#F24E1E', text: 'F' },
+  { name: 'Notion',      desc: '协作笔记',     url: 'https://www.notion.so',                   color: '#000000', text: 'N' },
+  { name: 'TikTok',      desc: '热门素材',     url: 'https://www.tiktok.com',                  color: '#000000', text: 'T' },
+  { name: 'YouTube',     desc: '视频参考',     url: 'https://www.youtube.com',                 color: '#FF0000', text: '▶' },
+  { name: 'Canva',       desc: '设计素材',     url: 'https://www.canva.com',                   color: '#00C4CC', text: 'C' },
+  { name: 'Unsplash',    desc: '免费图库',     url: 'https://unsplash.com',                    color: '#111111', text: 'U' },
+  { name: 'Remove.bg',   desc: '去背景',       url: 'https://www.remove.bg',                   color: '#0F0F0F', text: 'R' },
+  { name: 'GitHub',      desc: '代码托管',     url: 'https://github.com',                      color: '#333333', text: 'GH' },
+];
+
+function renderTools(){
+  const grid = document.getElementById('toolGrid');
+  if(!grid) return;
+  grid.innerHTML = tools.map(t => `
+    <a class="tool-card" href="${t.url}" target="_blank" rel="noopener noreferrer">
+      <div class="tlogo" style="background:${t.color}; ${t.dark ? 'color:#333;' : ''}">
+        ${t.text}
+      </div>
+      <div class="tinfo">
+        <div class="tname" title="${t.name}">${t.name}</div>
+        <div class="tdesc" title="${t.desc}">${t.desc}</div>
+      </div>
+    </a>
+  `).join('');
+}
+
+window.addEventListener('DOMContentLoaded', renderTools);
+</script>
+</body>
+</html>
