@@ -504,7 +504,7 @@ async function loadRevenue(force=false){
   btn.disabled = true;
   try {
     // 带 ?t= 时间戳避免浏览器缓存（Vercel/静态托管会缓存 JSON）
-    const url = 'api/revenue.json' + (force ? ('?t=' + Date.now()) : '');
+    const url = 'data/revenue.json' + (force ? ('?t=' + Date.now()) : '');
     const resp = await fetch(url, {cache:'no-store'});
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     const data = await resp.json();

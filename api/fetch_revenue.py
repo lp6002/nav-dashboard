@@ -20,7 +20,7 @@ from datetime import datetime, timezone, timedelta
 BASE = "http://47.237.119.194:8800"
 USER = "lipeng"
 PWD  = "peng123"
-OUT  = os.path.join(os.path.dirname(__file__), "revenue.json")
+OUT  = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "revenue.json")
 
 
 def _beijing_now():
