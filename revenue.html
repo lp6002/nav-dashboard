@@ -32,6 +32,9 @@ body{display:flex;min-height:100vh;background:#f5f0f5;}
 .sum-card .label{font-size:12px;color:#999;}
 .sum-card .value{font-size:24px;font-weight:700;color:#6a5acd;margin-top:6px;}
 .sum-card .value .unit{font-size:13px;color:#999;font-weight:400;margin-left:4px;}
+.filter-bar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center;background:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.filter-bar input,.filter-bar select{padding:7px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;background:#fff;outline:none;}
+.filter-bar input{flex:1;min-width:200px;}
 .table-wrap{overflow-x:auto;border-radius:14px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.04);margin-bottom:16px;}
 table{font-size:12px;border-collapse:collapse;width:100%;}
 th{padding:10px 12px;text-align:left;border-bottom:1px solid #eee;white-space:nowrap;font-weight:600;color:#555;background:#f8f6fc;position:sticky;top:0;z-index:5;}
@@ -77,7 +80,7 @@ tfoot td.right{text-align:right;}
     <div class="nav-divider"></div>
     <a class="nav-item" href="video.html"><span class="ico">🎬</span><span>视频</span></a>
     <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">💰</span><span>收益统计</span></div>
-    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🔧</span><span>常用工具</span><span class="arrow">›</span></div>
+    <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">🔧</span><span>常用工具</span><span class="arrow">›</span></a>
     <a class="nav-item" href="ai.html"><span class="ico">🤖</span><span>AI助手</span></a>
     <div class="nav-divider"></div>
     <div class="nav-item" style="cursor:default;opacity:.55"><span class="ico">⚙️</span><span>配置</span></div>
@@ -209,15 +212,15 @@ function renderRows(rows){
   rows.forEach((r,i) => {
     const zeroCls = (r.revenue===0) ? 'zero' : '';
     const err = r.error ? ' <span class="rev-down" style="font-size:10px;">⚠</span>' : '';
+    const upName = r.uploader || '';
     let upTag = '';
-    const upName = r.uploader_display || r.uploader || '';
     if(upName){
       const c = colorFor(upName);
-      upTag = `<span class="up-tag" style="background:${c.bg};color:${c.fg};">${upName}</span>`;
+      upTag = `<span class="up-tag" style="background:${c.bg};color:${c.fg};">${upName.replace(/</g,'&lt;')}</span>`;
     }
     html += `<tr class="${zeroCls}">
       <td>${i+1}</td>
-      <td class="rev-name">${upTag}${r.name}${err}</td>
+      <td class="rev-name">${upTag}${r.name.replace(/</g,'&lt;')}${err}</td>
       <td class="rev-pkg">${r.pkg}</td>
       <td>${r.publisher}</td>
       <td class="right" style="font-weight:600;">${fmtUsd(r.revenue)}</td>
@@ -236,7 +239,7 @@ function renderRows(rows){
 }
 function renderData(data){
   if(!data || !data.rows){
-    document.getElementById('revTbody').innerHTML = '<tr><td colspan="10" class="rev-empty">数据加载失败：'+(data&&data.error||'未知错误')+'</td></tr>';
+    document.getElementById('revTbody').innerHTML = '<tr><td colspan="10" class="rev-empty">数据加载失败</td></tr>';
     return;
   }
   allRows = data.rows;
