@@ -134,6 +134,46 @@ body{display:flex;min-height:100vh;background:#f5f0f5;}
 /* Footer */
 .footer{text-align:center;font-size:12px;color:#ccc;padding:20px 0 10px;}
 
+/* Revenue table */
+.revenue-wrap{
+  background:#fff;border-radius:14px;padding:6px 0 0 0;margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;
+}
+.rev-table{width:100%;border-collapse:collapse;font-size:12px;}
+.rev-table thead th{
+  background:#f8f6fc;color:#555;font-weight:600;padding:10px 12px;
+  border-bottom:1px solid #eee;white-space:nowrap;position:sticky;top:0;
+}
+.rev-table tbody td{
+  padding:9px 12px;border-bottom:1px solid #f3f3f3;color:#333;
+}
+.rev-table tbody tr:hover{background:#faf8ff;}
+.rev-table tbody tr:last-child td{border-bottom:none;}
+.rev-table tfoot td{
+  background:#f8f6fc;padding:10px 12px;border-top:2px solid #e0d8f0;
+}
+.rev-table .rev-empty{text-align:center;color:#999;padding:30px 0;}
+.rev-table .rev-zero{color:#bbb;}
+.rev-table .rev-name{font-weight:600;color:#6a5acd;}
+.rev-table .rev-pkg{font-family:ui-monospace,Consolas,monospace;color:#888;font-size:11px;}
+.rev-table .rev-pub{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10px;font-weight:600;}
+.rev-table .rev-pub.自投{background:#e8f0fe;color:#1a73e8;}
+.rev-table .rev-pub.发行{background:#fff3e0;color:#f57c00;}
+.rev-table .rev-pub.夏总{background:#fce4ec;color:#c2185b;}
+.rev-table .rev-pub.easou{background:#e0f2f1;color:#00796b;}
+.rev-table .rev-pub.其他,.rev-table .rev-pub.未知{background:#f3e5f5;color:#7b1fa2;}
+.rev-table .rev-up{color:#16a34a;}
+.rev-table .rev-down{color:#dc2626;}
+.rev-table .rev-na{color:#bbb;}
+#revRefreshBtn:hover{background:#5a4abd!important;}
+#revRefreshBtn.loading{opacity:0.6;cursor:wait;}
+#revRefreshBtn.loading #revRefreshIcon{display:inline-block;animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@media(max-width:900px){
+  .revenue-wrap{overflow-x:auto;}
+  .rev-table{min-width:760px;}
+}
+
 /* Responsive */
 @media(max-width:900px){
   .sidebar{width:56px;}
@@ -157,7 +197,7 @@ body{display:flex;min-height:100vh;background:#f5f0f5;}
   </div>
   <div class="sidebar-nav">
     <div class="nav-item active"><span class="ico">🏠</span><span>主页</span></div>
-    <div class="nav-item"><span class="ico">📊</span><span>广告投放</span><span class="arrow">›</span></div>
+    <div class="nav-item" onclick="scrollToRevenue()"><span class="ico">📊</span><span>收入数据管理</span><span class="arrow">›</span></div>
     <a class="nav-item" href="games.html"><span class="ico">🎯</span><span>游戏投放管理</span></a>
     <a class="nav-item" href="info_dashboard.html"><span class="ico">📰</span><span>每日资讯看板</span></a>
     <div class="nav-item"><span class="ico">📋</span><span>日报分析</span></div>
@@ -178,7 +218,7 @@ body{display:flex;min-height:100vh;background:#f5f0f5;}
   <div class="top-header">
     <a href="#" class="brand">🎯 工作台<span class="tag">Beta</span></a>
     <a href="#">📊 日报分析</a>
-    <a href="#">🎯 广告投放</a>
+    <a href="#">🎯 收入数据管理</a>
     <a href="#">🎮 游戏管理 ›</a>
     <a href="#">⚡ 快捷工具</a>
     <span class="right">本地导航</span>
@@ -239,6 +279,45 @@ body{display:flex;min-height:100vh;background:#f5f0f5;}
         </div>
         <a href="file:///C:/Users/lp263/工作空间/mtg/block_sand_relax/block_sand_relax.html" class="bbtn" target="_blank">打开试玩</a>
       </div>
+    </div>
+
+    <!-- Section: 收入数据管理 -->
+    <div class="sec-header" id="revenue-section">
+      <h3>💰 收入数据管理</h3>
+      <span class="tag">IAA 后台</span>
+      <span style="margin-left:auto;font-size:11px;color:#999;" id="revMeta">加载中…</span>
+      <button class="bbtn" id="revRefreshBtn" style="background:#6a5acd;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+        <span id="revRefreshIcon">↻</span><span>刷新</span>
+      </button>
+    </div>
+    <div class="revenue-wrap">
+      <table class="rev-table" id="revTable">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>应用</th>
+            <th>包名</th>
+            <th>渠道</th>
+            <th style="text-align:right;">现在收益 (USD)</th>
+            <th style="text-align:right;">今日预计收益 (USD)</th>
+            <th style="text-align:right;">环比</th>
+            <th style="text-align:right;">今日新增</th>
+            <th style="text-align:right;">今日活跃</th>
+            <th style="text-align:right;">广告条数</th>
+          </tr>
+        </thead>
+        <tbody id="revTbody">
+          <tr><td colspan="10" class="rev-empty">正在加载…</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="text-align:right;color:#888;font-weight:600;">合计</td>
+            <td id="revSumNow" style="text-align:right;font-weight:700;color:#6a5acd;">—</td>
+            <td id="revSumPred" style="text-align:right;font-weight:700;color:#6a5acd;">—</td>
+            <td colspan="4" id="revFormula" style="font-size:10px;color:#aaa;text-align:right;">预计 = 现在收益 ÷ 已过小时数 × 24</td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
 
     <!-- Section: 高频入口 -->
@@ -361,6 +440,87 @@ function getSearchUrl(){
   const q=document.getElementById('searchInput').value.trim();
   return q?'https://www.google.com/search?q='+encodeURIComponent(q):'#';
 }
+
+// ====== 收入数据管理 ======
+function scrollToRevenue(){
+  document.getElementById('revenue-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function fmtUsd(n){
+  if(n===null||n===undefined) return '—';
+  return '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtNum(n){
+  if(n===null||n===undefined) return '—';
+  return Number(n).toLocaleString('en-US');
+}
+function fmtPct(n){
+  if(n===null||n===undefined) return '<span class="rev-na">—</span>';
+  const v = Number(n);
+  if(!isFinite(v)) return '<span class="rev-na">—</span>';
+  const cls = v>=0 ? 'rev-up' : 'rev-down';
+  const arrow = v>=0 ? '↑' : '↓';
+  return `<span class="${cls}">${arrow} ${Math.abs(v).toFixed(1)}%</span>`;
+}
+function renderRevenue(data){
+  const tbody = document.getElementById('revTbody');
+  const meta = document.getElementById('revMeta');
+  const sumNow = document.getElementById('revSumNow');
+  const sumPred = document.getElementById('revSumPred');
+  const formula = document.getElementById('revFormula');
+  if(!data || !data.rows){
+    tbody.innerHTML = '<tr><td colspan="10" class="rev-empty">数据加载失败：'+(data&&data.error||'未知错误')+'</td></tr>';
+    meta.textContent = '加载失败';
+    return;
+  }
+  meta.textContent = `抓取于 ${data.fetched_at}（已过 ${data.hours_elapsed}h）· ${data.rows.length} 个应用`;
+  formula.textContent = `公式：现在收益 ÷ ${data.hours_elapsed}h × 24`;
+  let rows = '';
+  let totalNow=0, totalPred=0;
+  data.rows.forEach((r,i)=>{
+    if(r.revenue!==null && r.revenue!==undefined) totalNow += Number(r.revenue);
+    if(r.predicted!==null && r.predicted!==undefined) totalPred += Number(r.predicted);
+    const zeroCls = (r.revenue===0) ? 'rev-zero' : '';
+    const err = r.error ? ` <span class="rev-down" style="font-size:10px;">⚠</span>` : '';
+    rows += `<tr class="${zeroCls}">
+      <td>${i+1}</td>
+      <td class="rev-name">${r.name}${err}</td>
+      <td class="rev-pkg">${r.pkg}</td>
+      <td><span class="rev-pub ${r.publisher}">${r.publisher}</span></td>
+      <td style="text-align:right;font-weight:600;">${fmtUsd(r.revenue)}</td>
+      <td style="text-align:right;font-weight:600;color:#6a5acd;">${fmtUsd(r.predicted)}</td>
+      <td style="text-align:right;">${fmtPct(r.change_rate)}</td>
+      <td style="text-align:right;">${fmtNum(r.today_new_users)}</td>
+      <td style="text-align:right;">${fmtNum(r.today_active_users)}</td>
+      <td style="text-align:right;">${fmtNum(r.today_ad_count)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows;
+  sumNow.textContent = fmtUsd(totalNow);
+  sumPred.textContent = fmtUsd(totalPred);
+}
+async function loadRevenue(force=false){
+  const btn = document.getElementById('revRefreshBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  try {
+    // 带 ?t= 时间戳避免浏览器缓存（Vercel/静态托管会缓存 JSON）
+    const url = 'api/revenue.json' + (force ? ('?t=' + Date.now()) : '');
+    const resp = await fetch(url, {cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data = await resp.json();
+    renderRevenue(data);
+  } catch(e){
+    document.getElementById('revMeta').textContent = '加载失败：'+e.message;
+    document.getElementById('revTbody').innerHTML = '<tr><td colspan="10" class="rev-empty">数据加载失败：'+e.message+'<br><br>请确认 api/revenue.json 是否存在（运行 python api/fetch_revenue.py 生成）</td></tr>';
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+document.getElementById('revRefreshBtn').addEventListener('click', ()=>loadRevenue(true));
+// 首次进入页面 + 每 5 分钟自动刷新一次
+loadRevenue(false);
+setInterval(()=>loadRevenue(true), 5*60*1000);
 </script>
 </body>
 </html>
